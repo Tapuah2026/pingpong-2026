@@ -159,9 +159,12 @@
             </div>
         </div>
 
-        <div class="flex gap-3">
-            <button onclick="window.closeSchedule()" class="flex-1 bg-white/5 py-4 rounded-xl font-bold">ביטול</button>
-            <button onclick="window.saveSchedule()" class="flex-1 bg-primary py-4 rounded-xl font-bold shadow-lg shadow-primary/20">שמור משחק</button>
+        <div class="flex flex-col gap-3">
+            <div class="flex gap-3">
+                <button onclick="window.closeSchedule()" class="flex-1 bg-white/5 py-4 rounded-xl font-bold">ביטול</button>
+                <button onclick="window.saveSchedule()" class="flex-1 bg-white/10 py-4 rounded-xl font-bold">שמור לתור</button>
+            </div>
+            <button onclick="window.saveAndStartMatch()" class="w-full bg-green-500 py-4 rounded-xl font-bold shadow-lg shadow-green-500/20">שמור והתחל משחק עכשיו!</button>
         </div>
     </div>
 
@@ -287,6 +290,17 @@
         <button onclick="window.endMatch()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-4 rounded-2xl transition-all mt-6 flex items-center justify-center gap-2">
             <i class="fa-solid fa-flag-checkered"></i> סיום משחק ושמירה
         </button>
+
+        <!-- Upcoming Matches for Referee -->
+        <div class="mt-12 mb-8">
+            <h3 class="text-sm font-bold text-white/40 uppercase tracking-widest mb-4">משחקים מחכים</h3>
+            <div id="ref-upcoming-queue" class="space-y-3">
+                <!-- Populated by JS -->
+                <div class="text-center text-white/20 py-8 border border-dashed border-white/10 rounded-2xl text-sm">
+                    אין משחקים מתוזמנים
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -634,6 +648,78 @@
             });
         };
 
+        // --- Live Match Management ---
+        window.deleteUpcomingMatch = function(matchId) {
+            if(!window.db) return;
+            if(confirm('האם אתה בטוח שברצונך למחוק את המשחק המתוזמן?')) {
+                window.db.ref(`upcomingMatches/${matchId}`).remove();
+            }
+        };
+
+        window.startMatch = function(matchId, p1, p2) {
+            if(!window.db) return;
+            
+            const liveData = {
+                p1, p2,
+                score1: 0, score2: 0,
+                sets1: 0, sets2: 0,
+                currentSet: 1,
+                status: 'live',
+                startTime: Date.now()
+            };
+
+            // 1. Move to Live Match in Firebase
+            window.db.ref('liveMatch').set(liveData);
+            
+            // 2. Remove from Upcoming
+            window.db.ref(`upcomingMatches/${matchId}`).remove();
+            
+            // 3. Update Local UI Scoreboard
+            document.getElementById('ref-p1-name').innerText = p1;
+            document.getElementById('ref-p2-name').innerText = p2;
+            
+            if (typeof score1 !== 'undefined') score1 = 0;
+            if (typeof score2 !== 'undefined') score2 = 0;
+            if (typeof sets1 !== 'undefined') sets1 = 0;
+            if (typeof sets2 !== 'undefined') sets2 = 0;
+            if (typeof currentSet !== 'undefined') currentSet = 1;
+            
+            if(typeof window.renderScoreboard === 'function') window.renderScoreboard();
+            
+            alert(`המשחק בין ${p1} ל-${p2} התחיל!`);
+        };
+
+        // Listen for Upcoming Matches
+        if(window.db) {
+            window.db.ref('upcomingMatches').on('value', (snapshot) => {
+                const container = document.getElementById('ref-upcoming-queue');
+                const data = snapshot.val();
+                
+                if (!data) {
+                    container.innerHTML = `<div class="text-center text-white/20 py-8 border border-dashed border-white/10 rounded-2xl text-sm">אין משחקים מתוזמנים</div>`;
+                    return;
+                }
+
+                const upcoming = Object.entries(data).map(([key, val]) => ({ ...val, id: key }));
+                container.innerHTML = upcoming.map(m => `
+                    <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border border-white/5">
+                        <div class="flex flex-col">
+                            <span class="text-xs text-white/40">${m.date ? m.date.split('-').reverse().join('/') : 'היום'} | ${m.time}</span>
+                            <span class="font-bold text-sm">${m.p1} <span class="text-primary mx-1">VS</span> ${m.p2}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.deleteUpcomingMatch('${m.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white w-9 h-9 flex items-center justify-center rounded-xl transition-all">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            <button onclick="window.startMatch('${m.id}', '${m.p1}', '${m.p2}')" class="bg-green-500/20 hover:bg-green-500 text-green-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                                התחל
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+
         if (typeof players !== 'undefined') {
             const p1Select = document.getElementById('sched-p1');
             const p2Select = document.getElementById('sched-p2');
@@ -652,6 +738,43 @@
                 m2Select.selectedIndex = 1;
             }
         }
+        window.saveAndStartMatch = function() {
+            const p1 = document.getElementById('sched-p1').value;
+            const p2 = document.getElementById('sched-p2').value;
+            
+            if (p1 === p2) return alert("בחר שחקנים שונים");
+
+            const liveData = {
+                p1, p2,
+                score1: 0, score2: 0,
+                sets1: 0, sets2: 0,
+                currentSet: 1,
+                status: 'live',
+                startTime: Date.now()
+            };
+
+            if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
+
+            window.db.ref('liveMatch').set(liveData).then(() => {
+                // Update Local UI Scoreboard
+                document.getElementById('ref-p1-name').innerText = p1;
+                document.getElementById('ref-p2-name').innerText = p2;
+                
+                // Reset local variables (need to ensure these are accessible)
+                // Assuming they are global in the script
+                if (typeof score1 !== 'undefined') score1 = 0;
+                if (typeof score2 !== 'undefined') score2 = 0;
+                if (typeof sets1 !== 'undefined') sets1 = 0;
+                if (typeof sets2 !== 'undefined') sets2 = 0;
+                if (typeof currentSet !== 'undefined') currentSet = 1;
+                
+                // Trigger local UI update
+                if(typeof window.renderScoreboard === 'function') window.renderScoreboard();
+                
+                window.closeSchedule();
+                alert(`המשחק בין ${p1} ל-${p2} התחיל בשידור חי!`);
+            });
+        };
     </script>
 </body>
 </html>
