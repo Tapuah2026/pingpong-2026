@@ -1,0 +1,322 @@
+<html lang="he" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PingPong 2026</title>
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ef4444', // Red-500
+                        secondary: '#3b82f6', // Blue-500
+                        dark: '#0f172a', // Slate-900
+                        card: '#1e293b', // Slate-800
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&family=Inter:wght@400;500;700&display=swap');
+        body { font-family: 'Heebo', 'Inter', sans-serif; background-color: #0f172a; color: white; -webkit-tap-highlight-color: transparent; }
+        /* Splash Screen Gates */
+        #loader-wrapper {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column; /* Vertical split */
+            overflow: hidden;
+        }
+        .gate {
+            width: 100%;
+            height: 50%;
+            background: #0f172a;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 1.5s cubic-bezier(0.8, 0, 0.2, 1);
+            position: relative;
+        }
+        .gate-left { 
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .gate-right { 
+            border-top: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        #loader-content {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+        .loader-logo {
+            width: 280px;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
+            animation: bounce-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), pulse-red 2s infinite ease-in-out;
+            animation-delay: 0s, 1.2s;
+        }
+        @keyframes pulse-red {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.5)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 40px rgba(239, 68, 68, 0.9)); transform: scale(1.02); }
+        }
+        @keyframes bounce-in {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        
+        .loader-text {
+            margin-top: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .gates-open .gate-left { transform: translateY(-100%); }
+        .gates-open .gate-right { transform: translateY(100%); }
+        .gates-open #loader-content { opacity: 0; pointer-events: none; }
+        .gates-open #loader-wrapper { pointer-events: none; }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Hide scrollbar for clean mobile look */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="pb-32">
+    <!-- Splash Screen Loader -->
+    <div id="loader-wrapper">
+        <div class="gate gate-left"></div>
+        <div id="loader-content">
+            <img src="logo.png" class="loader-logo" alt="Tournament Logo">
+        </div>
+        <div class="gate gate-right"></div>
+    </div>
+ <!-- Padding bottom for fixed nav -->
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-primary text-white p-1.5 rounded-lg">
+                <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+            </div>
+            <h1 class="font-bold text-lg tracking-tight">פינג פונג 2026</h1>
+        </div>
+        <button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" onclick="window.location.href='referee.html'" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 px-4 max-w-md mx-auto pb-32 relative">
+        
+        <!-- HOME VIEW -->
+        <div id="view-home" class="view-section space-y-6">
+            <!-- Live Match Card -->
+            <section class="animate-fade-in-up">
+                <div class="flex items-center gap-2 mb-3" id="live-match-header" style="display: none">
+                    <span class="relative flex h-3 w-3" id="live-ping-icon">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                    </span>
+                    <h2 class="text-sm font-semibold tracking-wider text-primary uppercase" id="match-status-text">משחק פעיל</h2>
+                </div>
+
+                <div id="no-live-match" class="glass-panel rounded-2xl p-6 text-center text-white/50 hidden">
+                    <i class="fa-solid fa-table-tennis-paddle-ball text-3xl mb-2 opacity-30"></i>
+                    <p>אין משחק פעיל כרגע</p>
+                </div>
+                
+                <div id="live-match-card" class="glass-panel rounded-2xl p-5 shadow-xl relative overflow-hidden" style="display: none">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <!-- Player 1 -->
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 p-1 mb-2 shadow-lg">
+                                <img id="p1-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" alt="Player 1" class="w-full h-full rounded-full bg-white">
+                            </div>
+                            <span class="font-semibold text-sm" id="p1-name">John D.</span>
+                            <span class="text-xs font-bold text-white/50 mt-1" id="p1-sets">0 מערכות</span>
+                        </div>
+                        <!-- Score -->
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="flex items-center gap-3 text-4xl font-bold font-mono">
+                                <span class="text-white" id="p1-score">0</span>
+                                <span class="text-white/30 text-xl">-</span>
+                                <span class="text-white" id="p2-score">0</span>
+                            </div>
+                            <span class="text-xs text-white/50 mt-1"><span id="match-set">Set 1</span> • <span id="match-timer">08:30</span></span>
+                        </div>
+                        <!-- Player 2 -->
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 to-primary p-1 mb-2 shadow-lg">
+                                <img id="p2-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" alt="Player 2" class="w-full h-full rounded-full bg-white">
+                            </div>
+                            <span class="font-semibold text-sm" id="p2-name">Jane S.</span>
+                            <span class="text-xs font-bold text-white/50 mt-1" id="p2-sets">0 מערכות</span>
+                        </div>
+                    </div>
+                    <div class="mt-5 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 55%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upcoming Matches Section -->
+            <section class="animate-fade-in-up delay-100 mt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold tracking-wider text-white/50 uppercase">המשחקים הבאים</h2>
+                </div>
+                <div id="home-upcoming-queue" class="space-y-3">
+                    <!-- Populated by app.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- RESULTS VIEW (Finished Matches) -->
+        <div id="view-results" class="view-section hidden space-y-6 pb-6">
+            <h2 class="text-xl font-bold mb-4">תוצאות משחקים</h2>
+            <div id="results-container" class="space-y-4">
+                <!-- Populated by app.js -->
+                <div class="glass-panel p-6 rounded-2xl text-center text-white/50">
+                    <p>אין משחקים שהסתיימו עדיין</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GROUPS VIEW -->
+        <div id="view-groups" class="view-section hidden space-y-6 pb-6">
+            <h2 class="text-xl font-bold mb-4">בתי הטורניר</h2>
+            <div id="groups-container" class="space-y-6">
+                <!-- Populated by app.js -->
+            </div>
+        </div>
+
+        <!-- PLAYERS VIEW -->
+        <div id="view-players" class="view-section hidden space-y-6 pb-6">
+            <h2 class="text-xl font-bold mb-4">כל השחקנים</h2>
+            <div id="players-list" class="grid grid-cols-2 gap-4">
+                <!-- Populated by app.js -->
+            </div>
+        </div>
+
+        <!-- NEWS VIEW -->
+        <div id="view-news" class="view-section hidden space-y-6 pb-6">
+            <h2 class="text-xl font-bold mb-4">חדשות ועדכונים</h2>
+            <div id="news-container" class="space-y-6">
+                <div class="glass-panel p-6 rounded-2xl text-center text-white/50">
+                    <i class="fa-solid fa-newspaper text-4xl mb-3 opacity-50"></i>
+                    <p>אין עדכונים חדשים כרגע</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Player Profile Modal Overlay -->
+    <div id="player-modal" class="fixed inset-0 z-[60] bg-dark/90 backdrop-blur-md translate-y-full transition-transform duration-300 flex flex-col justify-end">
+        <div class="flex-1" onclick="closePlayerModal()"></div> <!-- Click outside to close -->
+        <div class="glass-panel rounded-t-3xl border-t border-white/20 p-6 flex flex-col max-h-[85vh]">
+            <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6"></div>
+            
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-1 shadow-lg">
+                    <img id="modal-img" src="" alt="Player" class="w-full h-full rounded-full bg-white object-cover">
+                </div>
+                <div>
+                    <h2 id="modal-name" class="text-2xl font-bold">Player Name</h2>
+                    <p id="modal-rank" class="text-primary font-medium">דירוג #1</p>
+                </div>
+                <button onclick="closePlayerModal()" class="ml-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-white/20">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-white/5 rounded-xl p-3 text-center">
+                    <p class="text-white/50 text-xs uppercase mb-1">משחקים</p>
+                    <p id="modal-played" class="font-mono text-xl font-bold">0</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-3 text-center">
+                    <p class="text-white/50 text-xs uppercase mb-1">% ניצחונות</p>
+                    <p id="modal-winrate" class="font-mono text-xl font-bold">0%</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-3 text-center">
+                    <p class="text-white/50 text-xs uppercase mb-1">נקודות</p>
+                    <p id="modal-points" class="font-mono text-xl font-bold text-green-400">0</p>
+                </div>
+            </div>
+
+            <h3 class="font-bold mb-3">תוצאות אחרונות</h3>
+            <div class="flex gap-2 mb-6" id="modal-form">
+                <!-- Form tags populated by JS -->
+            </div>
+
+            <button class="w-full py-4 glass-panel border border-primary/50 text-primary font-bold rounded-xl active:scale-95 transition-transform" onclick="closePlayerModal()">
+                Close Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/10 pb-safe">
+        <div class="flex justify-around items-center h-16 max-w-md mx-auto">
+            <button onclick="switchView('home')" id="nav-home" class="nav-btn flex flex-col items-center justify-center w-full h-full text-primary transition-colors">
+                <i class="fa-solid fa-house text-xl mb-1"></i>
+                <span class="text-[10px] font-medium mt-1">בית</span>
+            </button>
+            <button onclick="switchView('results')" id="nav-results" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+                <i class="fa-solid fa-check-double text-xl mb-1"></i>
+                <span class="text-[10px] font-medium mt-1">תוצאות</span>
+            </button>
+            <button onclick="switchView('groups')" id="nav-groups" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+                <i class="fa-solid fa-table text-xl mb-1"></i>
+                <span class="text-[10px] font-medium mt-1">בתים</span>
+            </button>
+            <button onclick="switchView('players')" id="nav-players" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+                <i class="fa-solid fa-user text-xl mb-1"></i>
+                <span class="text-[10px] font-medium mt-1">שחקנים</span>
+            </button>
+            <button onclick="switchView('news')" id="nav-news" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+                <i class="fa-solid fa-newspaper text-xl mb-1"></i>
+                <span class="text-[10px] font-medium mt-1">חדשות</span>
+            </button>
+        </div>
+    </nav>
+
+    <script src="data.js"></script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

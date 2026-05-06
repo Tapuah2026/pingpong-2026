@@ -1,0 +1,513 @@
+// --- Navigation Logic ---
+window.switchView = function(viewId) {
+    // Hide all views
+    document.querySelectorAll('.view-section').forEach(view => {
+        view.classList.add('hidden');
+    });
+    
+    // Show selected view
+    const targetView = document.getElementById(`view-${viewId}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('animate-fade-in-up');
+    }
+    
+    // Update nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-primary');
+        btn.classList.add('text-white/50');
+    });
+    const activeBtn = document.getElementById(`nav-${viewId}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-white/50');
+        activeBtn.classList.add('text-primary');
+    }
+};
+
+let calculatedPlayers = [];
+
+// --- Stats Calculation Engine ---
+function calculatePlayerStats(completedMatches) {
+    // Start with base players from data.js
+    const sourcePlayers = (typeof players !== 'undefined') ? players : [];
+    
+    const stats = sourcePlayers.map(p => ({
+        ...p,
+        played: 0,
+        wins: 0,
+        losses: 0,
+        points: 0,
+        winRate: 0,
+        form: []
+    }));
+
+    if (!completedMatches) return stats;
+
+    const matches = Object.values(completedMatches);
+    
+    matches.forEach(m => {
+        const p1 = stats.find(p => p.name === m.p1);
+        const p2 = stats.find(p => p.name === m.p2);
+
+        if (p1 && p2) {
+            p1.played++;
+            p2.played++;
+            
+            // Sets won/lost
+            p1.points += (m.sets1 - m.sets2); // Set Differential
+            p2.points += (m.sets2 - m.sets1);
+
+            if (m.sets1 > m.sets2) {
+                p1.wins++;
+                p1.form.push('W');
+                p2.losses++;
+                p2.form.push('L');
+            } else {
+                p2.wins++;
+                p2.form.push('W');
+                p1.losses++;
+                p1.form.push('L');
+            }
+        }
+    });
+
+    // Finalize win rates and limit form to last 5
+    stats.forEach(p => {
+        if (p.played > 0) {
+            p.winRate = Math.round((p.wins / p.played) * 100);
+        }
+        p.form = p.form.slice(-5);
+    });
+
+    return stats;
+}
+
+// --- Render Groups ---
+function renderGroups() {
+    const container = document.getElementById('groups-container');
+    if (!container || typeof groupNames === 'undefined') return;
+    
+    container.innerHTML = '';
+    
+    groupNames.forEach(groupName => {
+        let groupPlayers = calculatedPlayers.filter(p => p.group === groupName);
+        
+        if (groupPlayers.length === 0) {
+            groupPlayers = [
+                { name: `Empty Spot`, wins: 0, losses: 0, points: 0, seed: `Empty${groupName}1` },
+                { name: `Empty Spot`, wins: 0, losses: 0, points: 0, seed: `Empty${groupName}2` }
+            ];
+        } else {
+            groupPlayers.sort((a, b) => b.points - a.points || b.wins - a.wins);
+        }
+
+        let rowsHtml = '';
+        groupPlayers.forEach((p, index) => {
+            let rankColor = index === 0 ? 'text-yellow-500' : 'text-white/70';
+            let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
+            rowsHtml += `
+                <div class="flex items-center px-4 py-3 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
+                    <div class="w-8 font-bold ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-2">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-6 h-6 rounded-full bg-white">
+                        ${p.name}
+                    </div>
+                    <div class="w-16 text-center font-mono text-sm">${p.wins}-${p.losses}</div>
+                    <div class="w-12 text-right font-bold ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                </div>
+            `;
+        });
+
+        const groupHtml = `
+            <div class="glass-panel rounded-2xl overflow-hidden mb-6">
+                <div class="flex items-center px-4 py-3 bg-white/10 font-bold">בית ${groupName}</div>
+                <div class="flex items-center px-4 py-2 border-b border-white/5 text-xs text-white/50 uppercase tracking-wider">
+                    <div class="w-8">#</div>
+                    <div class="flex-1">שחקן</div>
+                    <div class="w-16 text-center">נ-ה</div>
+                    <div class="w-12 text-right">נק'</div>
+                </div>
+                ${rowsHtml}
+            </div>
+        `;
+        container.innerHTML += groupHtml;
+    });
+}
+
+// --- Render Players ---
+function renderPlayers() {
+    const list = document.getElementById('players-list');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    const sortedPlayers = [...calculatedPlayers].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedPlayers.forEach(p => {
+        list.innerHTML += `
+            <div class="glass-panel rounded-2xl p-4 flex flex-col items-center text-center active:scale-95 transition-transform" onclick="window.openPlayerModal(${p.id})">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-1 mb-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}" class="w-full h-full rounded-full bg-white">
+                </div>
+                <h3 class="font-bold text-sm mb-1">${p.name}</h3>
+                <span class="text-xs text-primary font-medium">דירוג #${p.rank || '-'}</span>
+            </div>
+        `;
+    });
+}
+
+// --- Player Profile Modal ---
+window.openPlayerModal = function(playerId) {
+    const p = calculatedPlayers.find(player => player.id === playerId);
+    if (!p) return;
+
+    document.getElementById('modal-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}`;
+    document.getElementById('modal-name').innerText = p.name;
+    document.getElementById('modal-rank').innerText = `בית ${p.group} • ${p.played} משחקים`;
+    document.getElementById('modal-played').innerText = p.played;
+    document.getElementById('modal-winrate').innerText = `${p.winRate}%`;
+    document.getElementById('modal-points').innerText = p.points > 0 ? `+${p.points}` : p.points;
+    document.getElementById('modal-points').className = p.points > 0 ? 'font-mono text-xl font-bold text-green-400' : (p.points < 0 ? 'font-mono text-xl font-bold text-red-400' : 'font-mono text-xl font-bold');
+
+    const formContainer = document.getElementById('modal-form');
+    formContainer.innerHTML = '';
+    p.form.forEach(res => {
+        const colorClass = res === 'W' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30';
+        formContainer.innerHTML += `<div class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-sm ${colorClass}">${res}</div>`;
+    });
+
+    document.getElementById('player-modal').classList.remove('translate-y-full');
+};
+
+window.closePlayerModal = function() {
+    document.getElementById('player-modal').classList.add('translate-y-full');
+};
+
+// --- Manual Entry Logic ---
+window.openManualEntry = function() {
+    const pin = prompt("הזן קוד גישה (PIN) להזנת תוצאה:");
+    if (pin === '1234') {
+        const m1Select = document.getElementById('man-p1');
+        const m2Select = document.getElementById('man-p2');
+        
+        if (m1Select && m2Select && typeof players !== 'undefined') {
+            let options = players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            m1Select.innerHTML = options;
+            m2Select.innerHTML = options;
+            if (players.length > 1) m2Select.selectedIndex = 1;
+        }
+        
+        document.getElementById('manual-overlay').classList.remove('translate-y-full');
+    } else if (pin !== null) {
+        alert("קוד שגוי!");
+    }
+};
+
+window.saveManualResult = function() {
+    const p1 = document.getElementById('man-p1').value;
+    const p2 = document.getElementById('man-p2').value;
+    const sets1 = parseInt(document.getElementById('man-sets1').value);
+    const sets2 = parseInt(document.getElementById('man-sets2').value);
+
+    if (p1 === p2) return alert("בחר שני שחקנים שונים");
+
+    const matchData = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        p1, p2, score1: 0, score2: 0, sets1, sets2
+    };
+
+    if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
+
+    window.db.ref('completedMatches').push(matchData).then(() => {
+        alert('התוצאה נשמרה בהצלחה!');
+        document.getElementById('manual-overlay').classList.add('translate-y-full');
+    });
+};
+
+// --- Social Logic (Likes & Comments) ---
+const userId = localStorage.getItem('pingpong_userid') || 'user_' + Math.random().toString(36).substr(2, 9);
+localStorage.setItem('pingpong_userid', userId);
+
+window.toggleLike = function(newsId) {
+    if (!window.db) return;
+    const likeRef = window.db.ref(`news/${newsId}/likes/${userId}`);
+    likeRef.once('value', (snap) => {
+        if (snap.exists()) {
+            likeRef.remove();
+        } else {
+            likeRef.set(true);
+        }
+    });
+};
+
+window.submitComment = function(newsId) {
+    const nameInput = document.getElementById(`comment-name-${newsId}`);
+    const textInput = document.getElementById(`comment-input-${newsId}`);
+    const name = nameInput.value.trim() || 'שחקן אורח';
+    const text = textInput.value.trim();
+    
+    if (!text || !window.db) return;
+
+    // Save name for next time
+    localStorage.setItem('pingpong_username', name);
+
+    const commentData = {
+        userId,
+        userName: name,
+        text,
+        date: new Date().toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})
+    };
+
+    window.db.ref(`news/${newsId}/comments`).push(commentData).then(() => {
+        textInput.value = '';
+    });
+};
+
+window.shareNews = function(title, text) {
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: text,
+            url: window.location.href
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        // Fallback for browsers that don't support native share
+        const dummy = document.createElement('input');
+        document.body.appendChild(dummy);
+        dummy.value = window.location.href;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        alert('הקישור הועתק ללוח!');
+    }
+};
+
+// --- Firebase Realtime Listeners ---
+
+function initAppListeners() {
+    if (!window.db) {
+        setTimeout(initAppListeners, 500);
+        return;
+    }
+
+    // 1. Live Match Listener
+    window.db.ref('liveMatch').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const liveCard = document.getElementById('live-match-card');
+        const noMatchMsg = document.getElementById('no-live-match');
+        const statusIcon = document.getElementById('live-ping-icon');
+        const statusText = document.getElementById('match-status-text');
+
+        const liveHeader = document.getElementById('live-match-header');
+
+        if (!data || data.p1 === '---') {
+            if (liveCard) liveCard.style.display = 'none';
+            if (liveHeader) liveHeader.style.display = 'none';
+            if (noMatchMsg) noMatchMsg.classList.remove('hidden');
+            return;
+        }
+
+        if (liveCard) liveCard.style.display = 'block';
+        if (liveHeader) liveHeader.style.display = 'flex';
+        if (noMatchMsg) noMatchMsg.classList.add('hidden');
+
+        document.getElementById('p1-name').innerText = data.p1.split(' ')[0];
+        document.getElementById('p2-name').innerText = data.p2.split(' ')[0];
+        document.getElementById('p1-score').innerText = data.score1;
+        document.getElementById('p2-score').innerText = data.score2;
+        document.getElementById('p1-sets').innerText = `${data.sets1} מערכות`;
+        document.getElementById('p2-sets').innerText = `${data.sets2} מערכות`;
+        document.getElementById('match-set').innerText = (data.sets1 === 2 || data.sets2 === 2) ? "המשחק הסתיים" : `מערכה ${data.currentSet}`;
+        document.getElementById('match-timer').innerText = (data.sets1 === 2 || data.sets2 === 2) ? "" : "שידור חי";
+
+        const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p1) : null;
+        const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p2) : null;
+        if (p1Base) document.getElementById('p1-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base.seed}`;
+        if (p2Base) document.getElementById('p2-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base.seed}`;
+    });
+
+    // 2. Upcoming Matches Listener
+    window.db.ref('upcomingMatches').on('value', (snapshot) => {
+        const container = document.getElementById('home-upcoming-queue');
+        if (!container) return;
+
+        const data = snapshot.val();
+        if (!data) {
+            container.innerHTML = '<p class="text-white/30 text-sm text-center py-4 bg-white/5 rounded-xl">No upcoming matches</p>';
+            return;
+        }
+
+        const upcoming = Object.values(data);
+        container.innerHTML = upcoming.map(m => {
+            const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p1) : null;
+            const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p2) : null;
+            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : m.p1}`;
+            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : m.p2}`;
+
+            return `
+                <div class="glass-panel p-3 rounded-xl flex items-center gap-3 animate-fade-in-up">
+                    <div class="text-center w-16 border-r border-white/10 pr-2">
+                        <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'היום'}</div>
+                        <div class="font-bold text-primary">${m.time}</div>
+                    </div>
+                    <div class="flex-1 flex items-center justify-between pl-2">
+                        <div class="flex items-center gap-2">
+                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10">
+                            <span class="text-sm font-semibold">${m.p1.split(' ')[0]}</span>
+                        </div>
+                        <span class="text-white/30 text-xs px-2">vs</span>
+                        <div class="flex items-center gap-2 flex-row-reverse">
+                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10">
+                            <span class="text-sm font-semibold">${m.p2.split(' ')[0]}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    });
+
+    // 3. Completed Matches & Results Listener
+    window.db.ref('completedMatches').on('value', (snapshot) => {
+        const data = snapshot.val();
+        calculatedPlayers = calculatePlayerStats(data);
+        renderGroups();
+        renderPlayers();
+
+        const container = document.getElementById('results-container');
+        if (!container) return;
+
+        if (!data) {
+            container.innerHTML = '<p class="text-white/30 text-sm text-center py-10">No results yet</p>';
+            return;
+        }
+
+        const matches = Object.values(data).reverse();
+        container.innerHTML = '';
+        
+        matches.forEach(match => {
+            const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p1) : null;
+            const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p2) : null;
+            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : match.p1}`;
+            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : match.p2}`;
+            const isP1Winner = match.sets1 > match.sets2;
+
+            const card = document.createElement('div');
+            card.className = 'glass-panel rounded-xl p-4 animate-fade-in-up flex flex-col gap-3 mb-3';
+            card.innerHTML = `
+                <div class="text-xs text-white/50 text-center uppercase tracking-widest">${match.date}</div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 w-1/3">
+                        <img src="${p1Img}" class="w-10 h-10 rounded-full bg-white/10 p-0.5 ${isP1Winner ? 'ring-2 ring-primary' : ''}">
+                        <span class="font-bold text-sm ${isP1Winner ? 'text-primary' : 'text-white/70'}">${match.p1.split(' ')[0]}</span>
+                    </div>
+                    <div class="flex items-center gap-2 font-mono text-xl w-1/3 justify-center">
+                        <span class="${isP1Winner ? 'font-black text-white' : 'text-white/50'}">${match.sets1}</span>
+                        <span class="text-white/20">-</span>
+                        <span class="${!isP1Winner ? 'font-black text-white' : 'text-white/50'}">${match.sets2}</span>
+                    </div>
+                    <div class="flex items-center gap-3 w-1/3 justify-end">
+                        <span class="font-bold text-sm ${!isP1Winner ? 'text-primary' : 'text-white/70'}">${match.p2.split(' ')[0]}</span>
+                        <img src="${p2Img}" class="w-10 h-10 rounded-full bg-white/10 p-0.5 ${!isP1Winner ? 'ring-2 ring-primary' : ''}">
+                    </div>
+                </div>
+                <div class="text-center text-xs text-white/30">סה"כ נקודות: ${match.score1} - ${match.score2}</div>
+            `;
+            container.appendChild(card);
+        });
+    });
+
+    // 4. News Listener
+    window.db.ref('news').on('value', (snapshot) => {
+        const container = document.getElementById('news-container');
+        if(!container) return;
+        
+        const data = snapshot.val();
+        if (!data) {
+            container.innerHTML = `
+                <div class="glass-panel p-6 rounded-2xl text-center text-white/50">
+                    <i class="fa-solid fa-newspaper text-4xl mb-3 opacity-50"></i>
+                    <p>אין עדכונים חדשים כרגע</p>
+                </div>`;
+            return;
+        }
+
+        const newsItems = Object.entries(data)
+            .map(([key, val]) => ({ ...val, firebaseKey: key }))
+            .sort((a, b) => b.id - a.id); // Newest first
+
+        container.innerHTML = newsItems.map(item => {
+            const likesCount = item.likes ? Object.keys(item.likes).length : 0;
+            const hasLiked = item.likes && item.likes[userId];
+            const comments = item.comments ? Object.values(item.comments) : [];
+            const savedName = localStorage.getItem('pingpong_username') || '';
+
+            return `
+                <article class="glass-panel rounded-2xl overflow-hidden animate-fade-in-up mb-6">
+                    ${item.image ? `<img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover border-b border-white/10">` : ''}
+                    <div class="p-5">
+                        <div class="text-xs text-white/40 font-bold mb-2 uppercase tracking-widest">${item.date}</div>
+                        <h3 class="text-lg font-bold mb-2">${item.title}</h3>
+                        <p class="text-white/70 text-sm leading-relaxed mb-6">${item.text}</p>
+                        
+                        <!-- Actions -->
+                        <div class="flex items-center gap-6 border-t border-white/5 pt-4 mb-4">
+                            <button onclick="window.toggleLike('${item.firebaseKey}')" class="flex items-center gap-2 ${hasLiked ? 'text-primary' : 'text-white/40'} transition-colors">
+                                <i class="${hasLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-xl"></i>
+                                <span class="text-sm font-bold">${likesCount}</span>
+                            </button>
+                            <div class="flex items-center gap-2 text-white/40">
+                                <i class="fa-regular fa-comment text-xl"></i>
+                                <span class="text-sm font-bold">${comments.length}</span>
+                            </div>
+                            <button onclick="window.shareNews('${item.title}', '${item.text.substring(0, 50)}...')" class="flex items-center gap-2 text-white/40 hover:text-white transition-colors">
+                                <i class="fa-solid fa-share-nodes text-xl"></i>
+                                <span class="text-sm font-bold text-xs uppercase">שתף</span>
+                            </button>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="space-y-3 mb-4">
+                            ${comments.map(c => `
+                                <div class="bg-white/5 rounded-xl p-3 text-xs">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="font-bold text-primary">${c.userName || 'שחקן אורח'}</span>
+                                        <span class="opacity-30">${c.date}</span>
+                                    </div>
+                                    <div class="text-white/80">${c.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Add Comment -->
+                        <div class="space-y-2">
+                            <input type="text" id="comment-name-${item.firebaseKey}" value="${savedName}" placeholder="שמך..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:border-primary">
+                            <div class="flex gap-2">
+                                <input type="text" id="comment-input-${item.firebaseKey}" placeholder="הוסף תגובה..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:border-primary">
+                                <button onclick="window.submitComment('${item.firebaseKey}')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold">שלח</button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    });
+}
+
+initAppListeners();
+
+// --- Initial Gate Opening ---
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.body.classList.add('gates-open');
+        // Optional: Remove loader from DOM after animation
+        setTimeout(() => {
+            const loader = document.getElementById('loader-wrapper');
+            if (loader) loader.style.display = 'none';
+        }, 1500);
+    }, 1800); // Wait for pulse animation to settle
+});
+
+// Initial render with empty stats
+calculatedPlayers = calculatePlayerStats(null);
+renderGroups();
+renderPlayers();
