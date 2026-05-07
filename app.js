@@ -371,31 +371,39 @@ window.switchView = function (viewId) {
 
 let isGroupsClosed = false;
 
+function getPlayerByName(name) {
+    if (!name || name === 'TBD') return { name: 'TBD', seed: 'none' };
+    return players.find(p => p.name === name) || { name: name, seed: 'none' };
+}
+
+function getBracketResult(phase, matchIndex) {
+    if (!allCompletedMatches) return { winner: null, loser: null, score1: '--', score2: '--' };
+    const m = allCompletedMatches.find(m => m.bracketPhase === phase && m.bracketIndex === matchIndex);
+    if (!m) return { winner: null, loser: null, score1: '--', score2: '--' };
+    
+    if (parseInt(m.sets1) > parseInt(m.sets2)) return { winner: m.p1, loser: m.p2, score1: m.sets1, score2: m.sets2 };
+    if (parseInt(m.sets2) > parseInt(m.sets1)) return { winner: m.p2, loser: m.p1, score1: m.sets2, score2: m.sets1 };
+    return { winner: null, loser: null, score1: m.sets1, score2: m.sets2 };
+}
+
 function renderBracket(phase) {
     const container = document.getElementById(`${phase}-container`);
     if (!container) return;
 
     let matchesHtml = '';
-    let matchCount = 0;
-    let title = '';
+    let matchCount = (phase === 'round16') ? 8 : (phase === 'quarters' ? 4 : (phase === 'semis' ? 2 : 2)); 
+    let title = (phase === 'round16') ? 'שמינית גמר' : (phase === 'quarters' ? 'רבע גמר' : (phase === 'semis' ? 'חצי גמר' : 'גמר וחלוקת מקומות'));
 
-    if (phase === 'round16') { matchCount = 8; title = 'שמינית גמר'; }
-    else if (phase === 'quarters') { matchCount = 4; title = 'רבע גמר'; }
-    else if (phase === 'semis') { matchCount = 2; title = 'חצי גמר'; }
-    else if (phase === 'final') { matchCount = 1; title = 'גמר'; }
-
-    // Logic to get winners if groups are closed
-    const bracketData = {}; // To store who is in which slot
-
+    const bracketData = {}; 
+    
     if (phase === 'round16' && isGroupsClosed) {
         const groupStandings = {};
         groupNames.forEach(gn => {
-            const players = calculatedPlayers.filter(p => p.group === gn);
-            players.sort((a, b) => b.points - a.points || b.wins - a.wins);
-            groupStandings[gn] = players;
+            const gPlayers = calculatedPlayers.filter(p => p.group === gn);
+            gPlayers.sort((a, b) => b.points - a.points || b.wins - a.wins);
+            groupStandings[gn] = gPlayers;
         });
 
-        // Fill slots: [MatchID, SlotID, PlayerObject]
         const pairings = [
             { m: 1, s: 1, g: 'A', r: 0 }, { m: 1, s: 2, g: 'B', r: 1 },
             { m: 2, s: 1, g: 'C', r: 0 }, { m: 2, s: 2, g: 'D', r: 1 },
@@ -408,33 +416,55 @@ function renderBracket(phase) {
         ];
 
         pairings.forEach(p => {
-            const player = groupStandings[p.g][p.r];
-            if (player) {
-                bracketData[`${p.m}-${p.s}`] = player;
-            }
+            const player = groupStandings[p.g] && groupStandings[p.g][p.r];
+            if (player) bracketData[`${p.m}-${p.s}`] = player;
         });
+    } else if (phase === 'quarters' && window.closedPhases?.round16) {
+        for (let i = 1; i <= 4; i++) {
+            bracketData[`${i}-1`] = getPlayerByName(getBracketResult('round16', (i * 2) - 1).winner);
+            bracketData[`${i}-2`] = getPlayerByName(getBracketResult('round16', (i * 2)).winner);
+        }
+    } else if (phase === 'semis' && window.closedPhases?.quarters) {
+        for (let i = 1; i <= 2; i++) {
+            bracketData[`${i}-1`] = getPlayerByName(getBracketResult('quarters', (i * 2) - 1).winner);
+            bracketData[`${i}-2`] = getPlayerByName(getBracketResult('quarters', (i * 2)).winner);
+        }
+    } else if (phase === 'final' && window.closedPhases?.semis) {
+        const res1 = getBracketResult('semis', 1);
+        const res2 = getBracketResult('semis', 2);
+        bracketData['1-1'] = getPlayerByName(res1.winner);
+        bracketData['1-2'] = getPlayerByName(res2.winner);
+        bracketData['2-1'] = getPlayerByName(res1.loser);
+        bracketData['2-2'] = getPlayerByName(res2.loser);
     }
 
     for (let i = 1; i <= matchCount; i++) {
         const p1 = bracketData[`${i}-1`] || { name: 'TBD', seed: 'none' };
         const p2 = bracketData[`${i}-2`] || { name: 'TBD', seed: 'none' };
+        const res = getBracketResult(phase, i);
+        
+        let matchTitle = '';
+        if (phase === 'final') {
+            matchTitle = i === 1 ? 'גמר (מקומות 1-2)' : 'משחק על מקום 3 (מקומות 3-4)';
+        }
 
         matchesHtml += `
-            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex items-center justify-between border border-white/5 bracket-node relative w-full max-w-[340px] mx-auto">
+            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex flex-col border border-white/5 bracket-node relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
+                ${matchTitle ? `<div class="text-[10px] text-primary font-bold uppercase mb-2 px-1 tracking-wider">${matchTitle}</div>` : ''}
                 <div class="flex flex-col gap-2 flex-1 w-full">
-                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg mb-1">
+                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs font-bold">--</span>
+                        <span class="font-mono text-primary text-xs font-bold">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs font-bold">--</span>
+                        <span class="font-mono text-primary text-xs font-bold">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
                     </div>
                 </div>
             </div>

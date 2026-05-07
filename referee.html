@@ -138,6 +138,22 @@
         <h2 class="text-xl font-bold mb-6">קביעת משחק חדש</h2>
         
         <div class="space-y-4 mb-8">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">שלב בטורניר</label>
+                    <select id="sched-bracket-phase" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
+                        <option value="">לא משחק נוקאאוט</option>
+                        <option value="round16">שמינית גמר</option>
+                        <option value="quarters">רבע גמר</option>
+                        <option value="semis">חצי גמר</option>
+                        <option value="final">גמר / מקום 3</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">מס' משחק (1-8)</label>
+                    <input type="number" id="sched-bracket-index" value="0" min="0" max="8" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
+                </div>
+            </div>
             <div>
                 <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">שחקן 1</label>
                 <select id="sched-p1" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
@@ -176,6 +192,23 @@
         <h2 class="text-xl font-bold mb-6">הזנת תוצאה ידנית</h2>
         
         <div class="space-y-4 mb-8">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">שלב בטורניר</label>
+                    <select id="man-bracket-phase" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
+                        <option value="">לא משחק נוקאאוט</option>
+                        <option value="round16">שמינית גמר</option>
+                        <option value="quarters">רבע גמר</option>
+                        <option value="semis">חצי גמר</option>
+                        <option value="final">גמר / מקום 3</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">מס' משחק (1-8)</label>
+                    <input type="number" id="man-bracket-index" value="0" min="0" max="8" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="text-xs text-white/50 uppercase mb-2 block font-bold tracking-widest">שחקן 1</label>
@@ -387,6 +420,8 @@
                     currentSet = data.currentSet || 1;
                     liveP1 = data.p1 || '---';
                     liveP2 = data.p2 || '---';
+                    window.liveBracketPhase = data.bracketPhase || null;
+                    window.liveBracketIndex = data.bracketIndex || null;
                     
                     document.getElementById('score-1').innerText = score1;
                     document.getElementById('score-2').innerText = score2;
@@ -446,7 +481,9 @@
             window.db.ref('liveMatch').set({
                 score1, score2, sets1, sets2, currentSet,
                 p1: document.getElementById('ref-p1-name').innerText,
-                p2: document.getElementById('ref-p2-name').innerText
+                p2: document.getElementById('ref-p2-name').innerText,
+                bracketPhase: window.liveBracketPhase || null,
+                bracketIndex: window.liveBracketIndex || null
             }).catch(err => {
                 alert("Firebase Error: " + err.message);
             });
@@ -519,10 +556,15 @@
             if (!time || !date) return alert("אנא בחר תאריך ושעה");
             if (p1 === p2) return alert("בחר שחקנים שונים");
 
+            const bracketPhase = document.getElementById('sched-bracket-phase').value;
+            const bracketIndex = parseInt(document.getElementById('sched-bracket-index').value);
+
             const matchData = {
                 p1, p2, time, date,
                 status: 'upcoming',
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                bracketPhase: bracketPhase || null,
+                bracketIndex: bracketIndex > 0 ? bracketIndex : null
             };
             
             if (!window.db) return alert("Database not connected");
@@ -567,7 +609,9 @@
                     score1: score1,
                     score2: score2,
                     sets1: sets1,
-                    sets2: sets2
+                    sets2: sets2,
+                    bracketPhase: window.liveBracketPhase || null,
+                    bracketIndex: window.liveBracketIndex || null
                 };
 
                 if(!window.db) return;
@@ -601,10 +645,15 @@
 
             if (p1 === p2) return alert("בחר שני שחקנים שונים");
 
+            const bracketPhase = document.getElementById('man-bracket-phase').value;
+            const bracketIndex = parseInt(document.getElementById('man-bracket-index').value);
+
             const matchData = {
                 id: Date.now(),
                 date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                p1, p2, score1: 0, score2: 0, sets1, sets2
+                p1, p2, score1: 0, score2: 0, sets1, sets2,
+                bracketPhase: bracketPhase || null,
+                bracketIndex: bracketIndex > 0 ? bracketIndex : null
             };
 
             if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
@@ -773,13 +822,18 @@
             
             if (p1 === p2) return alert("בחר שחקנים שונים");
 
+            const bracketPhase = document.getElementById('sched-bracket-phase').value;
+            const bracketIndex = parseInt(document.getElementById('sched-bracket-index').value);
+
             const liveData = {
                 p1, p2,
                 score1: 0, score2: 0,
                 sets1: 0, sets2: 0,
                 currentSet: 1,
                 status: 'live',
-                startTime: Date.now()
+                startTime: Date.now(),
+                bracketPhase: bracketPhase || null,
+                bracketIndex: bracketIndex > 0 ? bracketIndex : null
             };
 
             if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
