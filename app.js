@@ -420,7 +420,7 @@ function renderBracket(phase) {
         const p2 = bracketData[`${i}-2`] || { name: 'TBD', seed: 'none' };
 
         matchesHtml += `
-            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex items-center justify-between border border-white/5 bracket-node relative w-full max-w-sm mx-auto">
+            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex items-center justify-between border border-white/5 bracket-node relative w-full max-w-[340px] mx-auto">
                 <div class="flex flex-col gap-2 flex-1 w-full">
                     <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
                         <div class="flex items-center gap-2">
