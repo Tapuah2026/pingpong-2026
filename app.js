@@ -143,16 +143,16 @@ function renderGroups() {
         });
 
         const groupHtml = `
-            <div id="node-group-${groupName}" class="glass-panel rounded-xl overflow-hidden mb-4 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
-                <div class="flex items-center justify-between px-3 py-2 bg-white/10 font-bold text-[11px]">
-                    <span>בית ${groupName}</span>
+            <div id="node-group-${groupName}" class="glass-panel p-3 rounded-xl overflow-hidden mb-4 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
+                <div class="flex items-center justify-between mb-3 px-1 font-bold text-[11px]">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-primary"></i> בית ${groupName}</span>
                     ${isGroupsClosed ? '<span class="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                <div class="flex items-center px-3 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
+                <div class="flex items-center px-2 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
                     <div class="w-6">#</div>
-                    <div class="flex-1">שחקן</div>
+                    <div class="flex-1 text-right">שחקן</div>
                     <div class="w-12 text-center">נ-ה</div>
-                    <div class="w-8 text-right">נק'</div>
+                    <div class="w-8 text-left">נק'</div>
                 </div>
                 <div>
                     ${rowsHtml}
