@@ -225,9 +225,36 @@
 
         <!-- GROUPS VIEW -->
         <div id="view-groups" class="view-section hidden space-y-6 pb-6">
-            <h2 class="text-xl font-bold mb-4">בתי הטורניר</h2>
-            <div id="groups-container" class="space-y-6">
-                <!-- Populated by app.js -->
+            <h2 class="text-xl font-bold mb-4">שלבי הטורניר</h2>
+            
+            <!-- Tournament Phases Navigation -->
+            <div class="flex overflow-x-auto gap-4 py-2 mb-6 no-scrollbar snap-x snap-mandatory border-b border-white/10 sticky top-0 bg-dark/80 backdrop-blur-md z-10">
+                <button onclick="window.switchPhase('groups')" id="btn-phase-groups" class="phase-btn active snap-center">בתים</button>
+                <button onclick="window.switchPhase('round16')" id="btn-phase-round16" class="phase-btn snap-center">שמינית גמר</button>
+                <button onclick="window.switchPhase('quarters')" id="btn-phase-quarters" class="phase-btn snap-center">רבע גמר</button>
+                <button onclick="window.switchPhase('semis')" id="btn-phase-semis" class="phase-btn snap-center">חצי גמר</button>
+                <button onclick="window.switchPhase('final')" id="btn-phase-final" class="phase-btn snap-center">גמר</button>
+            </div>
+
+            <!-- Group Stage Content -->
+            <div id="phase-groups-content" class="phase-content">
+                <div id="groups-container" class="space-y-6">
+                    <!-- Tables populated by JS -->
+                </div>
+            </div>
+
+            <!-- Knockout Phases -->
+            <div id="phase-round16-content" class="phase-content hidden">
+                <div id="round16-container" class="space-y-4"></div>
+            </div>
+            <div id="phase-quarters-content" class="phase-content hidden">
+                <div id="quarters-container" class="space-y-4"></div>
+            </div>
+            <div id="phase-semis-content" class="phase-content hidden">
+                <div id="semis-container" class="space-y-4"></div>
+            </div>
+            <div id="phase-final-content" class="phase-content hidden">
+                <div id="final-container" class="space-y-4"></div>
             </div>
         </div>
 
