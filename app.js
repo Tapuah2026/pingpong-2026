@@ -318,16 +318,14 @@ window.scrollToSlide = function (phaseId) {
     const slide = document.getElementById(`slide-${phaseId}`);
     if (slide) {
         slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        // Update height immediately
-        const canvas = document.getElementById('bracket-canvas');
-        if (canvas) canvas.style.height = `${slide.offsetHeight}px`;
+        // Scroll window to top so shorter slides are visible
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
 function initScrollSpy() {
     const slider = document.getElementById('tournament-slider');
     const slides = document.querySelectorAll('.snap-slide');
-    const canvas = document.getElementById('bracket-canvas');
     if (!slider || !slides.length) return;
 
     const observer = new IntersectionObserver((entries) => {
@@ -338,14 +336,14 @@ function initScrollSpy() {
                 document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.getElementById(`btn-phase-${phaseId}`);
                 if (activeBtn) activeBtn.classList.add('active');
-
-                // Adjust canvas height to match active slide
-                if (canvas) {
-                    canvas.style.height = `${slide.offsetHeight}px`;
+                
+                // If we are significantly scrolled down, snap back to top on slide change
+                if (window.scrollY > 300) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
         });
-    }, { root: slider, threshold: 0.6 });
+    }, { root: slider, threshold: 0.8 });
 
     slides.forEach(slide => observer.observe(slide));
 }
