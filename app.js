@@ -282,6 +282,52 @@ window.shareNews = function(title, text) {
     }
 };
 
+window.switchPhase = function(phaseId) {
+    // Update buttons
+    document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-phase-${phaseId}`).classList.add('active');
+
+    // Update content
+    document.querySelectorAll('.phase-content').forEach(content => content.classList.add('hidden'));
+    document.getElementById(`phase-${phaseId}-content`).classList.remove('hidden');
+
+    // Re-render if needed
+    if (phaseId !== 'groups') {
+        renderBracket(phaseId);
+    }
+};
+
+function renderBracket(phase) {
+    const container = document.getElementById(`${phase}-container`);
+    if (!container) return;
+
+    // Check if we have data in Firebase for this phase
+    // For now, we'll show a "Mock" bracket for 16 players
+    if (phase === 'round16') {
+        container.innerHTML = `
+            <div class="space-y-4">
+                <div class="text-xs text-white/30 uppercase font-bold tracking-widest mb-4">משחקי שמינית הגמר</div>
+                ${[1,2,3,4,5,6,7,8].map(i => `
+                    <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border border-white/5 opacity-50">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                                <span class="text-sm font-bold">מנצח בית ${String.fromCharCode(64+i)}</span>
+                                <span class="font-mono text-primary">--</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                                <span class="text-sm font-bold">סגן בית ${String.fromCharCode(72-i+1)}</span>
+                                <span class="font-mono text-primary">--</span>
+                            </div>
+                        </div>
+                        <div class="w-px h-12 bg-white/10 mx-4"></div>
+                        <div class="text-[10px] text-white/20 uppercase vertical-text">TBD</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+}
+
 // --- Firebase Realtime Listeners ---
 
 function initAppListeners() {

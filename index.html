@@ -66,6 +66,17 @@
             text-align: center;
             transition: opacity 0.5s ease;
         }
+        .phase-btn {
+            @apply px-5 py-2 text-sm font-bold text-white/40 whitespace-nowrap transition-all rounded-full;
+        }
+        .phase-btn.active {
+            @apply text-white bg-primary shadow-[0_0_15px_rgba(239,68,68,0.4)];
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #groups-view { padding-top: 0; }
+
         .loader-logo {
             width: 280px;
             height: auto;
