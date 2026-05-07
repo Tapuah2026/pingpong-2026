@@ -127,6 +127,9 @@
             <button onclick="document.getElementById('schedule-overlay').classList.remove('translate-y-full')" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white" aria-label="Schedule">
                 <i class="fa-solid fa-calendar"></i>
             </button>
+            <button onclick="document.getElementById('mgmt-overlay').classList.remove('translate-y-full')" class="w-11 h-11 flex items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20" title="Tournament Management">
+                <i class="fa-solid fa-trophy"></i>
+            </button>
         </div>
     </header>
 
@@ -204,6 +207,27 @@
             <button onclick="document.getElementById('manual-overlay').classList.add('translate-y-full')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold">ביטול</button>
             <button onclick="window.saveManualResult()" class="flex-1 bg-blue-500 py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20">שמור תוצאה</button>
         </div>
+    </div>
+
+    <!-- Tournament Management Overlay -->
+    <div id="mgmt-overlay" class="fixed inset-0 z-[60] bg-slate-900/95 flex flex-col p-6 backdrop-blur-md transition-transform duration-300 translate-y-full overflow-y-auto">
+        <h2 class="text-xl font-bold mb-6">ניהול טורניר</h2>
+        
+        <div class="space-y-6 mb-8">
+            <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                <h3 class="font-bold mb-2">שלב הבתים</h3>
+                <p class="text-xs text-white/50 mb-4">סגירת שלב הבתים תקבע את העולות לשמינית הגמר ותנעל את הטבלאות.</p>
+                <button id="close-groups-btn" onclick="window.closeGroupsPhase()" class="w-full bg-primary py-3 rounded-xl font-bold text-sm">סגור שלב הבתים</button>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                <h3 class="font-bold mb-2">מחיקת כל הנתונים</h3>
+                <p class="text-xs text-white/50 mb-4">פעולה זו תמחק את כל המשחקים, החדשות והתוצאות. אין דרך חזרה!</p>
+                <button onclick="window.resetTournament()" class="w-full bg-white/5 border border-red-500/50 text-red-500 py-3 rounded-xl font-bold text-sm">איפוס טורניר מלא</button>
+            </div>
+        </div>
+
+        <button onclick="document.getElementById('mgmt-overlay').classList.add('translate-y-full')" class="w-full bg-white/5 py-4 rounded-xl font-bold">חזור</button>
     </div>
 
     <!-- News Entry Overlay -->
@@ -775,6 +799,44 @@
                 alert(`המשחק בין ${p1} ל-${p2} התחיל בשידור חי!`);
             });
         };
+
+        window.closeGroupsPhase = function() {
+            if(!confirm('האם אתה בטוח שברצונך לסגור את שלב הבתים? פעולה זו תנעל את הטבלאות ותעביר את הטורניר לשלב הנוקאאוט.')) return;
+            if(!window.db) return;
+            window.db.ref('tournamentState/isGroupsClosed').set(true).then(() => {
+                alert('שלב הבתים נסגר בהצלחה!');
+                document.getElementById('mgmt-overlay').classList.add('translate-y-full');
+            });
+        };
+
+        window.resetTournament = function() {
+            const pass = prompt("הזן סיסמת איפוס (reset):");
+            if (pass !== 'reset') return;
+            if (!window.db) return;
+            
+            window.db.ref('/').remove().then(() => {
+                alert('הטורניר אופס בהצלחה! מרענן את הדף...');
+                window.location.reload();
+            });
+        };
+
+        if(window.db) {
+            window.db.ref('tournamentState/isGroupsClosed').on('value', (snap) => {
+                const isClosed = snap.val();
+                const btn = document.getElementById('close-groups-btn');
+                if (btn) {
+                    if (isClosed) {
+                        btn.innerText = 'שלב הבתים סגור';
+                        btn.disabled = true;
+                        btn.className = 'w-full bg-white/5 text-white/30 py-3 rounded-xl font-bold text-sm cursor-not-allowed';
+                    } else {
+                        btn.innerText = 'סגור שלב הבתים';
+                        btn.disabled = false;
+                        btn.className = 'w-full bg-primary py-3 rounded-xl font-bold text-sm';
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>

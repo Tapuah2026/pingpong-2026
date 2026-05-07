@@ -1,17 +1,39 @@
+// --- Global Functions ---
+function openGates() {
+    if (document.body.classList.contains('gates-open')) return;
+
+    setTimeout(() => {
+        document.body.classList.add('gates-open');
+        console.log("Gates opening...");
+        setTimeout(() => {
+            const loader = document.getElementById('loader-wrapper');
+            if (loader) loader.style.display = 'none';
+        }, 1500);
+    }, 1000);
+}
+
+// Check state immediately
+if (document.readyState === 'complete') {
+    openGates();
+} else {
+    window.addEventListener('load', openGates);
+    setTimeout(openGates, 5000); // Failsafe
+}
+
 // --- Navigation Logic ---
-window.switchView = function(viewId) {
+window.switchView = function (viewId) {
     // Hide all views
     document.querySelectorAll('.view-section').forEach(view => {
         view.classList.add('hidden');
     });
-    
+
     // Show selected view
     const targetView = document.getElementById(`view-${viewId}`);
     if (targetView) {
         targetView.classList.remove('hidden');
         targetView.classList.add('animate-fade-in-up');
     }
-    
+
     // Update nav buttons
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('text-primary');
@@ -24,13 +46,15 @@ window.switchView = function(viewId) {
     }
 };
 
+// No bracket lines for now
+
 let calculatedPlayers = [];
 
 // --- Stats Calculation Engine ---
 function calculatePlayerStats(completedMatches) {
     // Start with base players from data.js
     const sourcePlayers = (typeof players !== 'undefined') ? players : [];
-    
+
     const stats = sourcePlayers.map(p => ({
         ...p,
         played: 0,
@@ -44,7 +68,7 @@ function calculatePlayerStats(completedMatches) {
     if (!completedMatches) return stats;
 
     const matches = Object.values(completedMatches);
-    
+
     matches.forEach(m => {
         const p1 = stats.find(p => p.name === m.p1);
         const p2 = stats.find(p => p.name === m.p2);
@@ -52,20 +76,20 @@ function calculatePlayerStats(completedMatches) {
         if (p1 && p2) {
             p1.played++;
             p2.played++;
-            
-            // Sets won/lost
-            p1.points += (m.sets1 - m.sets2); // Set Differential
-            p2.points += (m.sets2 - m.sets1);
 
             if (m.sets1 > m.sets2) {
                 p1.wins++;
+                p1.points += 2;
                 p1.form.push('W');
                 p2.losses++;
+                p2.points += 1;
                 p2.form.push('L');
             } else {
                 p2.wins++;
+                p2.points += 2;
                 p2.form.push('W');
                 p1.losses++;
+                p1.points += 1;
                 p1.form.push('L');
             }
         }
@@ -86,12 +110,12 @@ function calculatePlayerStats(completedMatches) {
 function renderGroups() {
     const container = document.getElementById('groups-container');
     if (!container || typeof groupNames === 'undefined') return;
-    
+
     container.innerHTML = '';
-    
+
     groupNames.forEach(groupName => {
         let groupPlayers = calculatedPlayers.filter(p => p.group === groupName);
-        
+
         if (groupPlayers.length === 0) {
             groupPlayers = [
                 { name: `Empty Spot`, wins: 0, losses: 0, points: 0, seed: `Empty${groupName}1` },
@@ -106,42 +130,48 @@ function renderGroups() {
             let rankColor = index === 0 ? 'text-yellow-500' : 'text-white/70';
             let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
             rowsHtml += `
-                <div class="flex items-center px-4 py-3 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
-                    <div class="w-8 font-bold ${rankColor}">${index + 1}</div>
-                    <div class="flex-1 font-medium flex items-center gap-2">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-6 h-6 rounded-full bg-white">
-                        ${p.name}
+                <div class="flex items-center px-3 py-2.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
+                    <div class="w-6 font-bold text-[10px] ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-2 text-[11px] truncate">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-5 h-5 rounded-full bg-white">
+                        <span class="truncate">${p.name}</span>
                     </div>
-                    <div class="w-16 text-center font-mono text-sm">${p.wins}-${p.losses}</div>
-                    <div class="w-12 text-right font-bold ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                    <div class="w-12 text-center font-mono text-[10px] text-white/60">${p.wins}-${p.losses}</div>
+                    <div class="w-8 text-right font-bold text-[10px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
                 </div>
             `;
         });
 
         const groupHtml = `
-            <div class="glass-panel rounded-2xl overflow-hidden mb-6">
-                <div class="flex items-center px-4 py-3 bg-white/10 font-bold">בית ${groupName}</div>
-                <div class="flex items-center px-4 py-2 border-b border-white/5 text-xs text-white/50 uppercase tracking-wider">
-                    <div class="w-8">#</div>
-                    <div class="flex-1">שחקן</div>
-                    <div class="w-16 text-center">נ-ה</div>
-                    <div class="w-12 text-right">נק'</div>
+            <div id="node-group-${groupName}" class="glass-panel rounded-xl overflow-hidden mb-4 relative w-full max-w-sm mx-auto">
+                <div class="flex items-center justify-between px-3 py-2 bg-white/10 font-bold text-[11px]">
+                    <span>בית ${groupName}</span>
+                    ${isGroupsClosed ? '<span class="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                ${rowsHtml}
+                <div class="flex items-center px-3 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
+                    <div class="w-6">#</div>
+                    <div class="flex-1">שחקן</div>
+                    <div class="w-12 text-center">נ-ה</div>
+                    <div class="w-8 text-right">נק'</div>
+                </div>
+                <div>
+                    ${rowsHtml}
+                </div>
             </div>
         `;
         container.innerHTML += groupHtml;
     });
+    // renderGroups complete
 }
 
 // --- Render Players ---
 function renderPlayers() {
     const list = document.getElementById('players-list');
     if (!list) return;
-    
+
     list.innerHTML = '';
     const sortedPlayers = [...calculatedPlayers].sort((a, b) => a.name.localeCompare(b.name));
-    
+
     sortedPlayers.forEach(p => {
         list.innerHTML += `
             <div class="glass-panel rounded-2xl p-4 flex flex-col items-center text-center active:scale-95 transition-transform" onclick="window.openPlayerModal(${p.id})">
@@ -156,7 +186,7 @@ function renderPlayers() {
 }
 
 // --- Player Profile Modal ---
-window.openPlayerModal = function(playerId) {
+window.openPlayerModal = function (playerId) {
     const p = calculatedPlayers.find(player => player.id === playerId);
     if (!p) return;
 
@@ -178,31 +208,31 @@ window.openPlayerModal = function(playerId) {
     document.getElementById('player-modal').classList.remove('translate-y-full');
 };
 
-window.closePlayerModal = function() {
+window.closePlayerModal = function () {
     document.getElementById('player-modal').classList.add('translate-y-full');
 };
 
 // --- Manual Entry Logic ---
-window.openManualEntry = function() {
+window.openManualEntry = function () {
     const pin = prompt("הזן קוד גישה (PIN) להזנת תוצאה:");
     if (pin === '1234') {
         const m1Select = document.getElementById('man-p1');
         const m2Select = document.getElementById('man-p2');
-        
+
         if (m1Select && m2Select && typeof players !== 'undefined') {
             let options = players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
             m1Select.innerHTML = options;
             m2Select.innerHTML = options;
             if (players.length > 1) m2Select.selectedIndex = 1;
         }
-        
+
         document.getElementById('manual-overlay').classList.remove('translate-y-full');
     } else if (pin !== null) {
         alert("קוד שגוי!");
     }
 };
 
-window.saveManualResult = function() {
+window.saveManualResult = function () {
     const p1 = document.getElementById('man-p1').value;
     const p2 = document.getElementById('man-p2').value;
     const sets1 = parseInt(document.getElementById('man-sets1').value);
@@ -212,11 +242,11 @@ window.saveManualResult = function() {
 
     const matchData = {
         id: Date.now(),
-        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         p1, p2, score1: 0, score2: 0, sets1, sets2
     };
 
-    if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
+    if (!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
 
     window.db.ref('completedMatches').push(matchData).then(() => {
         alert('התוצאה נשמרה בהצלחה!');
@@ -228,7 +258,7 @@ window.saveManualResult = function() {
 const userId = localStorage.getItem('pingpong_userid') || 'user_' + Math.random().toString(36).substr(2, 9);
 localStorage.setItem('pingpong_userid', userId);
 
-window.toggleLike = function(newsId) {
+window.toggleLike = function (newsId) {
     if (!window.db) return;
     const likeRef = window.db.ref(`news/${newsId}/likes/${userId}`);
     likeRef.once('value', (snap) => {
@@ -240,12 +270,12 @@ window.toggleLike = function(newsId) {
     });
 };
 
-window.submitComment = function(newsId) {
+window.submitComment = function (newsId) {
     const nameInput = document.getElementById(`comment-name-${newsId}`);
     const textInput = document.getElementById(`comment-input-${newsId}`);
     const name = nameInput.value.trim() || 'שחקן אורח';
     const text = textInput.value.trim();
-    
+
     if (!text || !window.db) return;
 
     // Save name for next time
@@ -255,7 +285,7 @@ window.submitComment = function(newsId) {
         userId,
         userName: name,
         text,
-        date: new Date().toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})
+        date: new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
     };
 
     window.db.ref(`news/${newsId}/comments`).push(commentData).then(() => {
@@ -263,18 +293,19 @@ window.submitComment = function(newsId) {
     });
 };
 
-window.shareNews = function(title, text) {
+window.shareNews = function (title, text, customUrl) {
+    const shareUrl = customUrl || window.location.href; // Use specific link or current page
     if (navigator.share) {
         navigator.share({
             title: title,
             text: text,
-            url: window.location.href
+            url: shareUrl
         }).catch(err => console.log('Error sharing:', err));
     } else {
-        // Fallback for browsers that don't support native share
+        // Fallback: copy the specific link
         const dummy = document.createElement('input');
         document.body.appendChild(dummy);
-        dummy.value = window.location.href;
+        dummy.value = shareUrl;
         dummy.select();
         document.execCommand('copy');
         document.body.removeChild(dummy);
@@ -282,50 +313,140 @@ window.shareNews = function(title, text) {
     }
 };
 
-window.switchPhase = function(phaseId) {
-    // Update buttons
-    document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`btn-phase-${phaseId}`).classList.add('active');
 
-    // Update content
-    document.querySelectorAll('.phase-content').forEach(content => content.classList.add('hidden'));
-    document.getElementById(`phase-${phaseId}-content`).classList.remove('hidden');
-
-    // Re-render if needed
-    if (phaseId !== 'groups') {
-        renderBracket(phaseId);
+window.scrollToSlide = function (phaseId) {
+    const slide = document.getElementById(`slide-${phaseId}`);
+    if (slide) {
+        slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
 };
+
+function initScrollSpy() {
+    const slider = document.getElementById('tournament-slider');
+    const slides = document.querySelectorAll('.snap-slide');
+    if (!slider || !slides.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const slide = entry.target;
+            if (entry.isIntersecting) {
+                // Update top nav
+                const phaseId = slide.id.replace('slide-', '');
+                document.querySelectorAll('.phase-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.getElementById(`btn-phase-${phaseId}`);
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+        });
+    }, { root: slider, threshold: 0.6 });
+
+    slides.forEach(slide => observer.observe(slide));
+}
+
+window.addEventListener('load', () => {
+    initScrollSpy();
+    if (document.readyState === 'complete') openGates();
+});
+
+// Update switchView to trigger rendering if needed
+const originalSwitchView = window.switchView;
+window.switchView = function (viewId) {
+    originalSwitchView(viewId);
+    if (viewId === 'groups') {
+        renderGroups();
+        renderBracket('round16');
+        renderBracket('quarters');
+        renderBracket('semis');
+        renderBracket('final');
+
+        // Ensure we start at the first slide (Groups)
+        setTimeout(() => {
+            window.scrollToSlide('groups');
+        }, 100);
+
+        setTimeout(initScrollSpy, 200);
+    }
+};
+
+let isGroupsClosed = false;
 
 function renderBracket(phase) {
     const container = document.getElementById(`${phase}-container`);
     if (!container) return;
 
-    // Check if we have data in Firebase for this phase
-    // For now, we'll show a "Mock" bracket for 16 players
-    if (phase === 'round16') {
-        container.innerHTML = `
-            <div class="space-y-4">
-                <div class="text-xs text-white/30 uppercase font-bold tracking-widest mb-4">משחקי שמינית הגמר</div>
-                ${[1,2,3,4,5,6,7,8].map(i => `
-                    <div class="glass-panel p-4 rounded-2xl flex items-center justify-between border border-white/5 opacity-50">
-                        <div class="flex flex-col gap-2 flex-1">
-                            <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-                                <span class="text-sm font-bold">מנצח בית ${String.fromCharCode(64+i)}</span>
-                                <span class="font-mono text-primary">--</span>
-                            </div>
-                            <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-                                <span class="text-sm font-bold">סגן בית ${String.fromCharCode(72-i+1)}</span>
-                                <span class="font-mono text-primary">--</span>
-                            </div>
+    let matchesHtml = '';
+    let matchCount = 0;
+    let title = '';
+
+    if (phase === 'round16') { matchCount = 8; title = 'שמינית גמר'; }
+    else if (phase === 'quarters') { matchCount = 4; title = 'רבע גמר'; }
+    else if (phase === 'semis') { matchCount = 2; title = 'חצי גמר'; }
+    else if (phase === 'final') { matchCount = 1; title = 'גמר'; }
+
+    // Logic to get winners if groups are closed
+    const bracketData = {}; // To store who is in which slot
+
+    if (phase === 'round16' && isGroupsClosed) {
+        const groupStandings = {};
+        groupNames.forEach(gn => {
+            const players = calculatedPlayers.filter(p => p.group === gn);
+            players.sort((a, b) => b.points - a.points || b.wins - a.wins);
+            groupStandings[gn] = players;
+        });
+
+        // Fill slots: [MatchID, SlotID, PlayerObject]
+        const pairings = [
+            { m: 1, s: 1, g: 'A', r: 0 }, { m: 1, s: 2, g: 'B', r: 1 },
+            { m: 2, s: 1, g: 'C', r: 0 }, { m: 2, s: 2, g: 'D', r: 1 },
+            { m: 3, s: 1, g: 'E', r: 0 }, { m: 3, s: 2, g: 'F', r: 1 },
+            { m: 4, s: 1, g: 'G', r: 0 }, { m: 4, s: 2, g: 'H', r: 1 },
+            { m: 5, s: 1, g: 'B', r: 0 }, { m: 5, s: 2, g: 'A', r: 1 },
+            { m: 6, s: 1, g: 'D', r: 0 }, { m: 6, s: 2, g: 'C', r: 1 },
+            { m: 7, s: 1, g: 'F', r: 0 }, { m: 7, s: 2, g: 'E', r: 1 },
+            { m: 8, s: 1, g: 'H', r: 0 }, { m: 8, s: 2, g: 'G', r: 1 }
+        ];
+
+        pairings.forEach(p => {
+            const player = groupStandings[p.g][p.r];
+            if (player) {
+                bracketData[`${p.m}-${p.s}`] = player;
+            }
+        });
+    }
+
+    for (let i = 1; i <= matchCount; i++) {
+        const p1 = bracketData[`${i}-1`] || { name: 'TBD', seed: 'none' };
+        const p2 = bracketData[`${i}-2`] || { name: 'TBD', seed: 'none' };
+
+        matchesHtml += `
+            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex items-center justify-between border border-white/5 bracket-node relative w-full max-w-sm mx-auto">
+                <div class="flex flex-col gap-2 flex-1 w-full">
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-5 h-5 rounded-full bg-white/10">
+                            <span class="text-[11px] font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
-                        <div class="w-px h-12 bg-white/10 mx-4"></div>
-                        <div class="text-[10px] text-white/20 uppercase vertical-text">TBD</div>
+                        <span class="font-mono text-primary text-xs">--</span>
                     </div>
-                `).join('')}
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-5 h-5 rounded-full bg-white/10">
+                            <span class="text-[11px] font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
+                        </div>
+                        <span class="font-mono text-primary text-xs">--</span>
+                    </div>
+                </div>
             </div>
         `;
     }
+
+    container.innerHTML = `
+        <div class="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] text-center mb-6 pt-4">${title}</div>
+        <div class="flex flex-col justify-around flex-1 gap-6">
+            ${matchesHtml}
+        </div>
+    `;
 }
 
 // --- Firebase Realtime Listeners ---
@@ -429,7 +550,7 @@ function initAppListeners() {
 
         const matches = Object.values(data).reverse();
         container.innerHTML = '';
-        
+
         matches.forEach(match => {
             const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p1) : null;
             const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p2) : null;
@@ -462,11 +583,21 @@ function initAppListeners() {
         });
     });
 
-    // 4. News Listener
+    // 4. Tournament State Listener
+    window.db.ref('tournamentState').on('value', (snapshot) => {
+        const state = snapshot.val();
+        if (state) {
+            isGroupsClosed = !!state.isGroupsClosed;
+            renderGroups();
+            renderBracket('round16');
+        }
+    });
+
+    // 5. News Listener
     window.db.ref('news').on('value', (snapshot) => {
         const container = document.getElementById('news-container');
-        if(!container) return;
-        
+        if (!container) return;
+
         const data = snapshot.val();
         if (!data) {
             container.innerHTML = `
@@ -505,7 +636,7 @@ function initAppListeners() {
                                 <i class="fa-regular fa-comment text-xl"></i>
                                 <span class="text-sm font-bold">${comments.length}</span>
                             </div>
-                            <button onclick="window.shareNews('${item.title}', '${item.text.substring(0, 50)}...')" class="flex items-center gap-2 text-white/40 hover:text-white transition-colors">
+                            <button onclick="window.shareNews('${item.title}', '${item.text.substring(0, 50)}...', '${window.location.origin}${window.location.pathname}?newsId=${item.firebaseKey}')" class="flex items-center gap-2 text-white/40 hover:text-white transition-colors">
                                 <i class="fa-solid fa-share-nodes text-xl"></i>
                                 <span class="text-sm font-bold text-xs uppercase">שתף</span>
                             </button>
@@ -541,19 +672,13 @@ function initAppListeners() {
 
 initAppListeners();
 
-// --- Initial Gate Opening ---
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        document.body.classList.add('gates-open');
-        // Optional: Remove loader from DOM after animation
-        setTimeout(() => {
-            const loader = document.getElementById('loader-wrapper');
-            if (loader) loader.style.display = 'none';
-        }, 1500);
-    }, 1800); // Wait for pulse animation to settle
-});
-
 // Initial render with empty stats
 calculatedPlayers = calculatePlayerStats(null);
 renderGroups();
 renderPlayers();
+renderBracket('round16');
+renderBracket('quarters');
+renderBracket('semis');
+renderBracket('final');
+
+
