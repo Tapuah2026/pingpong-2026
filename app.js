@@ -370,6 +370,8 @@ window.switchView = function (viewId) {
 };
 
 let isGroupsClosed = false;
+let allCompletedMatches = [];
+window.closedPhases = {};
 
 function getPlayerByName(name) {
     if (!name || name === 'TBD') return { name: 'TBD', seed: 'none' };
@@ -566,9 +568,15 @@ function initAppListeners() {
     // 3. Completed Matches & Results Listener
     window.db.ref('completedMatches').on('value', (snapshot) => {
         const data = snapshot.val();
+        allCompletedMatches = data ? Object.values(data) : [];
         calculatedPlayers = calculatePlayerStats(data);
+        
         renderGroups();
         renderPlayers();
+        renderBracket('round16');
+        renderBracket('quarters');
+        renderBracket('semis');
+        renderBracket('final');
 
         const container = document.getElementById('results-container');
         if (!container) return;
@@ -700,6 +708,20 @@ function initAppListeners() {
                 </article>
             `;
         }).join('');
+    });
+
+    // 5. Tournament State Listener
+    window.db.ref('tournamentState').on('value', (snapshot) => {
+        const state = snapshot.val() || {};
+        isGroupsClosed = !!state.isGroupsClosed;
+        window.closedPhases = state.closedPhases || {};
+        
+        // Re-render everything that depends on state
+        renderGroups();
+        renderBracket('round16');
+        renderBracket('quarters');
+        renderBracket('semis');
+        renderBracket('final');
     });
 }
 
