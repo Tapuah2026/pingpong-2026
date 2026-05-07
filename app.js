@@ -130,29 +130,29 @@ function renderGroups() {
             let rankColor = index === 0 ? 'text-yellow-500' : 'text-white/70';
             let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
             rowsHtml += `
-                <div class="flex items-center px-3 py-2 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
-                    <div class="w-6 font-bold text-[12px] ${rankColor}">${index + 1}</div>
-                    <div class="flex-1 font-medium flex items-center gap-2 text-[13px] truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-6 h-6 rounded-full bg-white">
+                <div class="flex items-center px-3 py-2.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
+                    <div class="w-6 font-bold text-xs ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-2.5 text-sm truncate">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-7 h-7 rounded-full bg-white shadow-sm">
                         <span class="truncate">${p.name}</span>
                     </div>
-                    <div class="w-12 text-center font-mono text-[11px] text-white/50">${p.wins}-${p.losses}</div>
-                    <div class="w-8 text-left font-bold text-[12px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                    <div class="w-14 text-center font-mono text-xs text-white/50">${p.wins}-${p.losses}</div>
+                    <div class="w-10 text-left font-bold text-sm ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
                 </div>
             `;
         });
 
         const groupHtml = `
-            <div id="node-group-${groupName}" class="glass-panel p-3 rounded-xl overflow-hidden mb-4 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-[13px]">
+            <div id="node-group-${groupName}" class="glass-panel p-3 rounded-xl overflow-hidden mb-5 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
+                <div class="flex items-center justify-between mb-4 px-1 font-black text-sm uppercase tracking-tight">
                     <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-primary"></i> בית ${groupName}</span>
-                    ${isGroupsClosed ? '<span class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
+                    ${isGroupsClosed ? '<span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/50 font-bold uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                <div class="flex items-center px-2 py-1.5 border-b border-white/5 text-[10px] text-white/40 uppercase tracking-wider font-bold">
+                <div class="flex items-center px-2 py-1.5 border-b border-white/5 text-[10px] text-white/40 uppercase tracking-widest font-black">
                     <div class="w-6">#</div>
                     <div class="flex-1 text-right">שחקן</div>
-                    <div class="w-12 text-center">נ-ה</div>
-                    <div class="w-8 text-left">נק'</div>
+                    <div class="w-14 text-center">נ-ה</div>
+                    <div class="w-10 text-left">נק'</div>
                 </div>
                 <div>
                     ${rowsHtml}
@@ -422,19 +422,19 @@ function renderBracket(phase) {
         matchesHtml += `
             <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex items-center justify-between border border-white/5 bracket-node relative w-full max-w-[340px] mx-auto">
                 <div class="flex flex-col gap-2 flex-1 w-full">
-                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-                        <div class="flex items-center gap-2">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-6 h-6 rounded-full bg-white/10">
-                            <span class="text-[13px] font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
+                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg mb-1">
+                        <div class="flex items-center gap-2.5">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <span class="text-sm font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-[12px]">--</span>
+                        <span class="font-mono text-primary text-xs font-bold">--</span>
                     </div>
-                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-                        <div class="flex items-center gap-2">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-6 h-6 rounded-full bg-white/10">
-                            <span class="text-[13px] font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
+                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
+                        <div class="flex items-center gap-2.5">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <span class="text-sm font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-[12px]">--</span>
+                        <span class="font-mono text-primary text-xs font-bold">--</span>
                     </div>
                 </div>
             </div>
