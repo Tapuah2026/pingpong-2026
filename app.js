@@ -318,7 +318,7 @@ window.scrollToSlide = function (phaseId) {
     const slide = document.getElementById(`slide-${phaseId}`);
     if (slide) {
         slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        // Scroll window to top so shorter slides are visible
+        // Only scroll to top when user explicitly clicks a button
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
@@ -336,14 +336,9 @@ function initScrollSpy() {
                 document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.getElementById(`btn-phase-${phaseId}`);
                 if (activeBtn) activeBtn.classList.add('active');
-                
-                // If we are significantly scrolled down, snap back to top on slide change
-                if (window.scrollY > 300) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
             }
         });
-    }, { root: slider, threshold: 0.8 });
+    }, { root: slider, threshold: 0.9 });
 
     slides.forEach(slide => observer.observe(slide));
 }
