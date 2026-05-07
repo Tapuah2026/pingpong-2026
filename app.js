@@ -130,29 +130,29 @@ function renderGroups() {
             let rankColor = index === 0 ? 'text-yellow-500' : 'text-white/70';
             let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
             rowsHtml += `
-                <div class="flex items-center px-2 py-1 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
-                    <div class="w-4 font-bold text-[8px] ${rankColor}">${index + 1}</div>
-                    <div class="flex-1 font-medium flex items-center gap-1 text-[9px] truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-3.5 h-3.5 rounded-full bg-white">
+                <div class="flex items-center px-3 py-2 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
+                    <div class="w-6 font-bold text-[10px] ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-2 text-[11px] truncate">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-5 h-5 rounded-full bg-white">
                         <span class="truncate">${p.name}</span>
                     </div>
-                    <div class="w-9 text-center font-mono text-[8px] text-white/40">${p.wins}-${p.losses}</div>
-                    <div class="w-6 text-right font-bold text-[9px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                    <div class="w-12 text-center font-mono text-[10px] text-white/50">${p.wins}-${p.losses}</div>
+                    <div class="w-8 text-right font-bold text-[10px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
                 </div>
             `;
         });
 
         const groupHtml = `
-            <div id="node-group-${groupName}" class="glass-panel rounded-lg overflow-hidden mb-2 relative w-full max-w-[210px] mx-auto">
-                <div class="flex items-center justify-between px-2 py-1 bg-white/10 font-bold text-[9px]">
+            <div id="node-group-${groupName}" class="glass-panel rounded-xl overflow-hidden mb-4 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
+                <div class="flex items-center justify-between px-3 py-2 bg-white/10 font-bold text-[11px]">
                     <span>בית ${groupName}</span>
-                    ${isGroupsClosed ? '<span class="text-[7px] bg-white/10 px-1 py-0.5 rounded text-white/40 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
+                    ${isGroupsClosed ? '<span class="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                <div class="flex items-center px-2 py-0.5 border-b border-white/5 text-[7px] text-white/30 uppercase tracking-wider font-bold">
-                    <div class="w-4">#</div>
+                <div class="flex items-center px-3 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
+                    <div class="w-6">#</div>
                     <div class="flex-1">שחקן</div>
-                    <div class="w-9 text-center">נ-ה</div>
-                    <div class="w-6 text-right">נק'</div>
+                    <div class="w-12 text-center">נ-ה</div>
+                    <div class="w-8 text-right">נק'</div>
                 </div>
                 <div>
                     ${rowsHtml}
