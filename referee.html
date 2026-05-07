@@ -215,9 +215,14 @@
         
         <div class="space-y-6 mb-8">
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
-                <h3 class="font-bold mb-2">שלב הבתים</h3>
-                <p class="text-xs text-white/50 mb-4">סגירת שלב הבתים תקבע את העולות לשמינית הגמר ותנעל את הטבלאות.</p>
-                <button id="close-groups-btn" onclick="window.closeGroupsPhase()" class="w-full bg-primary py-3 rounded-xl font-bold text-sm">סגור שלב הבתים</button>
+                <h3 class="font-bold mb-2">ניהול שלבים</h3>
+                <p class="text-xs text-white/50 mb-4">סגירת שלב מקפיאה את התוצאות ומעבירה את המנצחים לשלב הבא.</p>
+                <div class="space-y-3">
+                    <button id="close-groups-btn" onclick="window.closePhase('groups')" class="w-full bg-primary py-3 rounded-xl font-bold text-sm">סגור שלב הבתים</button>
+                    <button id="close-round16-btn" onclick="window.closePhase('round16')" class="w-full bg-blue-500 py-3 rounded-xl font-bold text-sm">סגור שמינית גמר</button>
+                    <button id="close-quarters-btn" onclick="window.closePhase('quarters')" class="w-full bg-blue-500 py-3 rounded-xl font-bold text-sm">סגור רבע גמר</button>
+                    <button id="close-semis-btn" onclick="window.closePhase('semis')" class="w-full bg-blue-500 py-3 rounded-xl font-bold text-sm">סגור חצי גמר</button>
+                </div>
             </div>
 
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
@@ -800,13 +805,17 @@
             });
         };
 
-        window.closeGroupsPhase = function() {
-            if(!confirm('האם אתה בטוח שברצונך לסגור את שלב הבתים? פעולה זו תנעל את הטבלאות ותעביר את הטורניר לשלב הנוקאאוט.')) return;
+        window.closePhase = function(phase) {
+            const names = { groups: 'שלב הבתים', round16: 'שמינית גמר', quarters: 'רבע גמר', semis: 'חצי גמר' };
+            if(!confirm(`האם אתה בטוח שברצונך לסגור את ${names[phase]}? פועלה זו תנעל את התוצאות ותעביר את המנצחים לשלב הבא.`)) return;
             if(!window.db) return;
-            window.db.ref('tournamentState/isGroupsClosed').set(true).then(() => {
-                alert('שלב הבתים נסגר בהצלחה!');
-                document.getElementById('mgmt-overlay').classList.add('translate-y-full');
-            });
+            
+            if (phase === 'groups') {
+                window.db.ref('tournamentState/isGroupsClosed').set(true);
+            } else {
+                window.db.ref(`tournamentState/closedPhases/${phase}`).set(true);
+            }
+            alert(`${names[phase]} נסגר בהצלחה!`);
         };
 
         window.resetTournament = function() {
@@ -821,20 +830,35 @@
         };
 
         if(window.db) {
-            window.db.ref('tournamentState/isGroupsClosed').on('value', (snap) => {
-                const isClosed = snap.val();
-                const btn = document.getElementById('close-groups-btn');
-                if (btn) {
-                    if (isClosed) {
-                        btn.innerText = 'שלב הבתים סגור';
-                        btn.disabled = true;
-                        btn.className = 'w-full bg-white/5 text-white/30 py-3 rounded-xl font-bold text-sm cursor-not-allowed';
+            window.db.ref('tournamentState').on('value', (snap) => {
+                const state = snap.val() || {};
+                const closedPhases = state.closedPhases || {};
+                
+                // Handle Groups
+                const groupBtn = document.getElementById('close-groups-btn');
+                if (groupBtn) {
+                    if (state.isGroupsClosed) {
+                        groupBtn.innerText = 'שלב הבתים סגור';
+                        groupBtn.disabled = true;
+                        groupBtn.className = 'w-full bg-white/5 text-white/30 py-3 rounded-xl font-bold text-sm cursor-not-allowed';
                     } else {
-                        btn.innerText = 'סגור שלב הבתים';
-                        btn.disabled = false;
-                        btn.className = 'w-full bg-primary py-3 rounded-xl font-bold text-sm';
+                        groupBtn.innerText = 'סגור שלב הבתים';
+                        groupBtn.disabled = false;
+                        groupBtn.className = 'w-full bg-primary py-3 rounded-xl font-bold text-sm';
                     }
                 }
+
+                // Handle Knockout Phases
+                ['round16', 'quarters', 'semis'].forEach(phase => {
+                    const btn = document.getElementById(`close-${phase}-btn`);
+                    if (btn) {
+                        if (closedPhases[phase]) {
+                            btn.innerText = `${btn.innerText.split(' ')[1]} ${btn.innerText.split(' ')[2] || ''} סגור`.trim();
+                            btn.disabled = true;
+                            btn.className = 'w-full bg-white/5 text-white/30 py-3 rounded-xl font-bold text-sm cursor-not-allowed';
+                        }
+                    }
+                });
             });
         }
     </script>

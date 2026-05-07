@@ -130,29 +130,29 @@ function renderGroups() {
             let rankColor = index === 0 ? 'text-yellow-500' : 'text-white/70';
             let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
             rowsHtml += `
-                <div class="flex items-center px-3 py-2.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
-                    <div class="w-6 font-bold text-[10px] ${rankColor}">${index + 1}</div>
-                    <div class="flex-1 font-medium flex items-center gap-2 text-[11px] truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-5 h-5 rounded-full bg-white">
+                <div class="flex items-center px-2 py-1.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
+                    <div class="w-5 font-bold text-[9px] ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-1.5 text-[10px] truncate">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-4 h-4 rounded-full bg-white">
                         <span class="truncate">${p.name}</span>
                     </div>
-                    <div class="w-12 text-center font-mono text-[10px] text-white/60">${p.wins}-${p.losses}</div>
-                    <div class="w-8 text-right font-bold text-[10px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                    <div class="w-10 text-center font-mono text-[9px] text-white/50">${p.wins}-${p.losses}</div>
+                    <div class="w-7 text-right font-bold text-[9px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
                 </div>
             `;
         });
 
         const groupHtml = `
-            <div id="node-group-${groupName}" class="glass-panel rounded-xl overflow-hidden mb-4 relative w-full max-w-sm mx-auto">
-                <div class="flex items-center justify-between px-3 py-2 bg-white/10 font-bold text-[11px]">
+            <div id="node-group-${groupName}" class="glass-panel rounded-xl overflow-hidden mb-3 relative w-full max-w-[260px] mx-auto">
+                <div class="flex items-center justify-between px-2.5 py-1.5 bg-white/10 font-bold text-[10px]">
                     <span>בית ${groupName}</span>
-                    ${isGroupsClosed ? '<span class="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
+                    ${isGroupsClosed ? '<span class="text-[7px] bg-white/10 px-1 py-0.5 rounded text-white/40 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                <div class="flex items-center px-3 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
-                    <div class="w-6">#</div>
+                <div class="flex items-center px-2 py-1 border-b border-white/5 text-[8px] text-white/30 uppercase tracking-wider font-bold">
+                    <div class="w-5">#</div>
                     <div class="flex-1">שחקן</div>
-                    <div class="w-12 text-center">נ-ה</div>
-                    <div class="w-8 text-right">נק'</div>
+                    <div class="w-10 text-center">נ-ה</div>
+                    <div class="w-7 text-right">נק'</div>
                 </div>
                 <div>
                     ${rowsHtml}
@@ -585,12 +585,15 @@ function initAppListeners() {
 
     // 4. Tournament State Listener
     window.db.ref('tournamentState').on('value', (snapshot) => {
-        const state = snapshot.val();
-        if (state) {
-            isGroupsClosed = !!state.isGroupsClosed;
-            renderGroups();
-            renderBracket('round16');
-        }
+        const state = snapshot.val() || {};
+        isGroupsClosed = !!state.isGroupsClosed;
+        window.closedPhases = state.closedPhases || {};
+        
+        renderGroups();
+        renderBracket('round16');
+        renderBracket('quarters');
+        renderBracket('semis');
+        renderBracket('final');
     });
 
     // 5. News Listener
@@ -669,6 +672,20 @@ function initAppListeners() {
         }).join('');
     });
 }
+
+// --- Page Load Handling ---
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('newsId');
+    if (newsId) {
+        setTimeout(() => {
+            window.switchView('news');
+            // Scroll to the specific news item if it exists
+            const newsItem = document.querySelector(`[onclick*="${newsId}"]`);
+            if (newsItem) newsItem.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+    }
+});
 
 initAppListeners();
 
