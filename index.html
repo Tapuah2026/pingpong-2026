@@ -270,27 +270,27 @@
             <!-- Slides Container (Bracket Canvas) -->
             <div id="tournament-slider" class="overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth relative">
                 
-                <div id="bracket-canvas" class="flex items-stretch relative pb-10">
+                <div id="bracket-canvas" class="flex items-start relative pb-10 transition-all duration-300">
                     
                     <!-- Group Stage Content -->
-                    <div id="slide-groups" class="w-full shrink-0 snap-center px-2">
+                    <div id="slide-groups" class="w-full shrink-0 snap-center px-2 snap-slide">
                         <div id="groups-container" class="space-y-4 py-2">
                             <!-- Tables populated by JS -->
                         </div>
                     </div>
 
                     <!-- Knockout Phases -->
-                    <div id="slide-round16" class="w-full shrink-0 snap-center px-2">
-                        <div id="round16-container" class="flex flex-col justify-around h-full py-4 space-y-8"></div>
+                    <div id="slide-round16" class="w-full shrink-0 snap-center px-2 snap-slide">
+                        <div id="round16-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-quarters" class="w-full shrink-0 snap-center px-2">
-                        <div id="quarters-container" class="flex flex-col justify-around h-full py-4 space-y-8"></div>
+                    <div id="slide-quarters" class="w-full shrink-0 snap-center px-2 snap-slide">
+                        <div id="quarters-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-semis" class="w-full shrink-0 snap-center px-2">
-                        <div id="semis-container" class="flex flex-col justify-around h-full py-4 space-y-8"></div>
+                    <div id="slide-semis" class="w-full shrink-0 snap-center px-2 snap-slide">
+                        <div id="semis-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-final" class="w-full shrink-0 snap-center px-2">
-                        <div id="final-container" class="flex flex-col justify-around h-full py-4 space-y-8"></div>
+                    <div id="slide-final" class="w-full shrink-0 snap-center px-2 snap-slide">
+                        <div id="final-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
                 </div>
             </div>

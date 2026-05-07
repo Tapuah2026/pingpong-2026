@@ -318,25 +318,31 @@ window.scrollToSlide = function (phaseId) {
     const slide = document.getElementById(`slide-${phaseId}`);
     if (slide) {
         slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // Update height immediately
+        const canvas = document.getElementById('bracket-canvas');
+        if (canvas) canvas.style.height = `${slide.offsetHeight}px`;
     }
 };
 
 function initScrollSpy() {
     const slider = document.getElementById('tournament-slider');
     const slides = document.querySelectorAll('.snap-slide');
+    const canvas = document.getElementById('bracket-canvas');
     if (!slider || !slides.length) return;
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const slide = entry.target;
             if (entry.isIntersecting) {
-                // Update top nav
                 const phaseId = slide.id.replace('slide-', '');
-                document.querySelectorAll('.phase-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
+                document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.getElementById(`btn-phase-${phaseId}`);
                 if (activeBtn) activeBtn.classList.add('active');
+
+                // Adjust canvas height to match active slide
+                if (canvas) {
+                    canvas.style.height = `${slide.offsetHeight}px`;
+                }
             }
         });
     }, { root: slider, threshold: 0.6 });
