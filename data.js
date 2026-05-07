@@ -22,7 +22,7 @@ var players = [
     { id: 21, name: "אביב לובטון", group: "E", seed: "Aviv" },
     { id: 22, name: "אופיר בר", group: "E", seed: "Ofir" },
     { id: 23, name: "זיו מימון", group: "E", seed: "Ziv" },
-    { id: 24, name: "דביל שאול", group: "F", seed: "Shaul" },
+    { id: 24, name: "דביר שאול", group: "F", seed: "Shaul" },
     { id: 25, name: "איתי רזניק", group: "F", seed: "Reznik" },
     { id: 26, name: "ליאור מנטקה", group: "F", seed: "Lior" },
     { id: 27, name: "אלון מזרחי", group: "F", seed: "Alon" },
