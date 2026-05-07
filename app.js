@@ -131,24 +131,24 @@ function renderGroups() {
             let ptsColor = p.points > 0 ? 'text-green-400' : (p.points < 0 ? 'text-red-400' : 'text-white/50');
             rowsHtml += `
                 <div class="flex items-center px-3 py-2 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
-                    <div class="w-6 font-bold text-[10px] ${rankColor}">${index + 1}</div>
-                    <div class="flex-1 font-medium flex items-center gap-2 text-[11px] truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-5 h-5 rounded-full bg-white">
+                    <div class="w-6 font-bold text-[12px] ${rankColor}">${index + 1}</div>
+                    <div class="flex-1 font-medium flex items-center gap-2 text-[13px] truncate">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-6 h-6 rounded-full bg-white">
                         <span class="truncate">${p.name}</span>
                     </div>
-                    <div class="w-12 text-center font-mono text-[10px] text-white/50">${p.wins}-${p.losses}</div>
-                    <div class="w-8 text-right font-bold text-[10px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
+                    <div class="w-12 text-center font-mono text-[11px] text-white/50">${p.wins}-${p.losses}</div>
+                    <div class="w-8 text-left font-bold text-[12px] ${ptsColor}">${p.points > 0 ? '+' : ''}${p.points}</div>
                 </div>
             `;
         });
 
         const groupHtml = `
             <div id="node-group-${groupName}" class="glass-panel p-3 rounded-xl overflow-hidden mb-4 relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
-                <div class="flex items-center justify-between mb-3 px-1 font-bold text-[11px]">
+                <div class="flex items-center justify-between mb-3 px-1 font-bold text-[13px]">
                     <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-primary"></i> בית ${groupName}</span>
-                    ${isGroupsClosed ? '<span class="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
+                    ${isGroupsClosed ? '<span class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 uppercase"><i class="fa-solid fa-lock mr-1"></i>סגור</span>' : ''}
                 </div>
-                <div class="flex items-center px-2 py-1.5 border-b border-white/5 text-[9px] text-white/40 uppercase tracking-wider font-bold">
+                <div class="flex items-center px-2 py-1.5 border-b border-white/5 text-[10px] text-white/40 uppercase tracking-wider font-bold">
                     <div class="w-6">#</div>
                     <div class="flex-1 text-right">שחקן</div>
                     <div class="w-12 text-center">נ-ה</div>
@@ -424,17 +424,17 @@ function renderBracket(phase) {
                 <div class="flex flex-col gap-2 flex-1 w-full">
                     <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
                         <div class="flex items-center gap-2">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-5 h-5 rounded-full bg-white/10">
-                            <span class="text-[11px] font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-6 h-6 rounded-full bg-white/10">
+                            <span class="text-[13px] font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs">--</span>
+                        <span class="font-mono text-primary text-[12px]">--</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
                         <div class="flex items-center gap-2">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-5 h-5 rounded-full bg-white/10">
-                            <span class="text-[11px] font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-6 h-6 rounded-full bg-white/10">
+                            <span class="text-[13px] font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs">--</span>
+                        <span class="font-mono text-primary text-[12px]">--</span>
                     </div>
                 </div>
             </div>
