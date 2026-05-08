@@ -595,6 +595,9 @@ function initAppListeners() {
         // Handle Predictions
         const p1Pred = document.getElementById('p1-prediction');
         const p2Pred = document.getElementById('p2-prediction');
+        const p1Bar = document.getElementById('p1-prediction-bar');
+        const p2Bar = document.getElementById('p2-prediction-bar');
+
         if (data.matchId && predictions[data.matchId]) {
             const matchPredictions = predictions[data.matchId];
             const total = Object.keys(matchPredictions).length;
@@ -612,9 +615,13 @@ function initAppListeners() {
                 p2Pred.innerText = `${p2Percent}%`;
                 p2Pred.classList.remove('hidden');
             }
+            if (p1Bar) p1Bar.style.width = `${p1Percent}%`;
+            if (p2Bar) p2Bar.style.width = `${p2Percent}%`;
         } else {
             if (p1Pred) p1Pred.classList.add('hidden');
             if (p2Pred) p2Pred.classList.add('hidden');
+            if (p1Bar) p1Bar.style.width = `50%`;
+            if (p2Bar) p2Bar.style.width = `50%`;
         }
     });
 

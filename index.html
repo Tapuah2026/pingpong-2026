@@ -197,7 +197,7 @@
                             <span class="font-semibold text-sm" id="p1-name">John D.</span>
                              <div class="flex items-center gap-1.5 mt-1">
                                 <span class="text-xs font-bold text-white/50" id="p1-sets">0 מערכות</span>
-                                <span id="p1-prediction" class="text-[10px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-md hidden">0%</span>
+                                <span id="p1-prediction" class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
                              </div>
                         </div>
                         <!-- Score -->
@@ -217,12 +217,13 @@
                             <span class="font-semibold text-sm" id="p2-name">Jane S.</span>
                              <div class="flex items-center gap-1.5 mt-1 flex-row-reverse">
                                 <span class="text-xs font-bold text-white/50" id="p2-sets">0 מערכות</span>
-                                <span id="p2-prediction" class="text-[10px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-md hidden">0%</span>
+                                <span id="p2-prediction" class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
                              </div>
                         </div>
                     </div>
-                    <div class="mt-5 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-primary h-full" style="width: 55%"></div>
+                    <div class="mt-5 w-full bg-white/10 rounded-full h-1.5 overflow-hidden flex">
+                        <div id="p1-prediction-bar" class="bg-primary h-full transition-all duration-700 ease-out" style="width: 50%"></div>
+                        <div id="p2-prediction-bar" class="bg-white/20 h-full transition-all duration-700 ease-out" style="width: 50%"></div>
                     </div>
                 </div>
             </section>
