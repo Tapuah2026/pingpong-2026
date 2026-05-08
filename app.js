@@ -175,8 +175,9 @@ function renderPlayers() {
 
     sortedPlayers.forEach(p => {
         const votes = playerVotes[p.id] || {};
-        const upVotes = Object.values(votes).filter(v => v === 'up').length;
-        const downVotes = Object.values(votes).filter(v => v === 'down').length;
+        const crownVotes = Object.values(votes).filter(v => v === 'crown').length;
+        const zeroVotes = Object.values(votes).filter(v => v === 'zero').length;
+        const middleVotes = Object.values(votes).filter(v => v === 'middle').length;
         const userVote = votes[userId];
 
         list.innerHTML += `
@@ -191,15 +192,20 @@ function renderPlayers() {
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-4 bg-white/5 px-3 py-2 rounded-xl">
-                    <button onclick="window.togglePlayerVote(${p.id}, 'up')" class="flex items-center gap-1.5 transition-all ${userVote === 'up' ? 'text-green-400 scale-110' : 'text-white/30 hover:text-white/60'}">
-                        <i class="fa-solid fa-thumbs-up text-sm"></i>
-                        <span class="text-xs font-bold font-mono">${upVotes}</span>
+                <div class="flex items-center gap-3 bg-white/5 px-3 py-2 rounded-xl">
+                    <button onclick="window.togglePlayerVote(${p.id}, 'crown')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'crown' ? 'text-yellow-400 scale-110' : 'text-white/30 hover:text-white/60'}">
+                        <i class="fa-solid fa-crown text-sm"></i>
+                        <span class="text-[10px] font-bold font-mono">${crownVotes}</span>
                     </button>
                     <div class="w-[1px] h-3 bg-white/10"></div>
-                    <button onclick="window.togglePlayerVote(${p.id}, 'down')" class="flex items-center gap-1.5 transition-all ${userVote === 'down' ? 'text-red-400 scale-110' : 'text-white/30 hover:text-white/60'}">
-                        <i class="fa-solid fa-thumbs-down text-sm"></i>
-                        <span class="text-xs font-bold font-mono">${downVotes}</span>
+                    <button onclick="window.togglePlayerVote(${p.id}, 'zero')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'zero' ? 'text-red-400 scale-110' : 'text-white/30 hover:text-white/60'}">
+                        <i class="fa-solid fa-0 text-sm"></i>
+                        <span class="text-[10px] font-bold font-mono">${zeroVotes}</span>
+                    </button>
+                    <div class="w-[1px] h-3 bg-white/10"></div>
+                    <button onclick="window.togglePlayerVote(${p.id}, 'middle')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'middle' ? 'text-purple-400 scale-110' : 'text-white/30 hover:text-white/60'}">
+                        <span class="text-sm">🖕</span>
+                        <span class="text-[10px] font-bold font-mono">${middleVotes}</span>
                     </button>
                 </div>
             </div>
