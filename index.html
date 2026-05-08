@@ -127,6 +127,15 @@
         .animate-slide-down {
             animation: slide-down-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+        @keyframes rotate-glow {
+            0% { box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444; }
+            50% { box-shadow: 0 0 15px #ef4444, 0 0 25px #ef4444; }
+            100% { box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444; }
+        }
+        .active-ring-glow {
+            animation: rotate-glow 2s infinite ease-in-out;
+            border-color: #ef4444 !important;
+        }
         /* Hide scrollbar for clean mobile look */
         ::-webkit-scrollbar { display: none; }
     </style>
