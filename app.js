@@ -49,6 +49,7 @@ window.switchView = function (viewId) {
 // No bracket lines for now
 
 let calculatedPlayers = [];
+let playerVotes = {}; // { playerId: { userId: 'up' | 'down' } }
 
 // --- Stats Calculation Engine ---
 function calculatePlayerStats(completedMatches) {
@@ -173,17 +174,54 @@ function renderPlayers() {
     const sortedPlayers = [...calculatedPlayers].sort((a, b) => a.name.localeCompare(b.name));
 
     sortedPlayers.forEach(p => {
+        const votes = playerVotes[p.id] || {};
+        const upVotes = Object.values(votes).filter(v => v === 'up').length;
+        const downVotes = Object.values(votes).filter(v => v === 'down').length;
+        const userVote = votes[userId];
+
         list.innerHTML += `
-            <div class="glass-panel rounded-2xl p-4 flex flex-col items-center text-center active:scale-95 transition-transform" onclick="window.openPlayerModal(${p.id})">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-1 mb-3">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}" class="w-full h-full rounded-full bg-white">
+            <div class="glass-panel rounded-2xl p-3 flex items-center justify-between animate-fade-in-up">
+                <div class="flex items-center gap-3 flex-1" onclick="window.openPlayerModal(${p.id})">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-0.5">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}" class="w-full h-full rounded-full bg-white">
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="font-bold text-sm text-white">${p.name}</h3>
+                        <span class="text-[10px] text-primary font-medium">בית ${p.group} • #${p.rank || '-'}</span>
+                    </div>
                 </div>
-                <h3 class="font-bold text-sm mb-1">${p.name}</h3>
-                <span class="text-xs text-primary font-medium">דירוג #${p.rank || '-'}</span>
+                
+                <div class="flex items-center gap-4 bg-white/5 px-3 py-2 rounded-xl">
+                    <button onclick="window.togglePlayerVote(${p.id}, 'up')" class="flex items-center gap-1.5 transition-all ${userVote === 'up' ? 'text-green-400 scale-110' : 'text-white/30 hover:text-white/60'}">
+                        <i class="fa-solid fa-thumbs-up text-sm"></i>
+                        <span class="text-xs font-bold font-mono">${upVotes}</span>
+                    </button>
+                    <div class="w-[1px] h-3 bg-white/10"></div>
+                    <button onclick="window.togglePlayerVote(${p.id}, 'down')" class="flex items-center gap-1.5 transition-all ${userVote === 'down' ? 'text-red-400 scale-110' : 'text-white/30 hover:text-white/60'}">
+                        <i class="fa-solid fa-thumbs-down text-sm"></i>
+                        <span class="text-xs font-bold font-mono">${downVotes}</span>
+                    </button>
+                </div>
             </div>
         `;
     });
 }
+
+window.togglePlayerVote = function(playerId, voteType) {
+    if (!window.db) return;
+    const voteRef = window.db.ref(`playerVotes/${playerId}/${userId}`);
+    
+    voteRef.once('value', (snap) => {
+        const currentVote = snap.val();
+        if (currentVote === voteType) {
+            // Remove vote if clicking same one
+            voteRef.remove();
+        } else {
+            // Set or update vote
+            voteRef.set(voteType);
+        }
+    });
+};
 
 // --- Player Profile Modal ---
 window.openPlayerModal = function (playerId) {
@@ -487,6 +525,12 @@ function initAppListeners() {
         setTimeout(initAppListeners, 500);
         return;
     }
+
+    // 0. Player Votes Listener
+    window.db.ref('playerVotes').on('value', (snapshot) => {
+        playerVotes = snapshot.val() || {};
+        renderPlayers();
+    });
 
     // 1. Live Match Listener
     window.db.ref('liveMatch').on('value', (snapshot) => {
