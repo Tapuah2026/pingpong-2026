@@ -211,7 +211,7 @@ function renderPlayers() {
                     <div class="w-[1px] h-3 bg-white/10"></div>
                     <button onclick="window.togglePlayerVote(${p.id}, 'palestine')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'palestine' ? 'scale-110' : 'opacity-40 hover:opacity-100'}">
                         <img src="https://flagcdn.com/w40/ps.png" class="w-4 h-auto rounded-sm">
-                        <span class="text-[9px] font-bold font-mono ${userVote === 'palestine' ? 'text-green-400' : 'text-white/30'}">${palestineVotes}</span>
+                        <span class="text-[9px] font-bold font-mono ${userVote === 'palestine' ? 'text-red-500' : 'text-white/30'}">${palestineVotes}</span>
                     </button>
                 </div>
             </div>
