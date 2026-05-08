@@ -241,7 +241,7 @@ window.openPlayerModal = function (playerId) {
     const p = calculatedPlayers.find(player => player.id === playerId);
     if (!p) return;
 
-    document.getElementById('modal-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}`;
+    document.getElementById('modal-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
     document.getElementById('modal-name').innerText = p.name;
     document.getElementById('modal-rank').innerText = `בית ${p.group} • ${p.played} משחקים`;
     document.getElementById('modal-played').innerText = p.played;
