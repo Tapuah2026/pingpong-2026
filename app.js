@@ -630,8 +630,8 @@ function updateUpcomingUI(data) {
             <div class="glass-panel p-3 rounded-xl flex flex-col gap-3 animate-fade-in-up overflow-hidden relative">
                 <div class="flex items-center gap-3">
                     <div class="text-center w-16 border-r border-white/10 pr-2">
-                        <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'היום'}</div>
-                        <div class="font-bold text-primary">${m.time}</div>
+                        <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'TBD'}</div>
+                        <div class="font-bold text-primary">${m.time || '--:--'}</div>
                     </div>
                     <div class="flex-1 flex items-center justify-between pl-2">
                         <!-- Player 1 -->

@@ -135,7 +135,7 @@
 
     <!-- Schedule Overlay -->
     <div id="schedule-overlay" class="fixed inset-0 z-[60] bg-slate-900/95 flex flex-col p-6 backdrop-blur-md transition-transform duration-300 translate-y-full overflow-y-auto">
-        <h2 class="text-xl font-bold mb-6">קביעת משחק חדש</h2>
+        <h2 class="text-xl font-bold mb-6" id="schedule-title">קביעת משחק חדש</h2>
         
         <div class="space-y-4 mb-8">
             <div class="grid grid-cols-2 gap-4">
@@ -403,6 +403,7 @@
         let currentSet = 1;
         let liveP1 = '---';
         let liveP2 = '---';
+        let currentEditingMatchId = null;
 
         function initListeners() {
             if (!window.db) {
@@ -545,6 +546,34 @@
 
         window.closeSchedule = function() {
             document.getElementById('schedule-overlay').classList.add('translate-y-full');
+            // Reset form
+            document.getElementById('sched-p1').value = '';
+            document.getElementById('sched-p2').value = '';
+            document.getElementById('sched-time').value = '';
+            document.getElementById('sched-date').value = '';
+            document.getElementById('sched-bracket-phase').value = '';
+            document.getElementById('sched-bracket-index').value = '0';
+            document.getElementById('schedule-title').innerText = 'קביעת משחק חדש';
+            currentEditingMatchId = null;
+        };
+
+        window.editUpcomingMatch = function(matchId) {
+            if (!window.db) return;
+            window.db.ref(`upcomingMatches/${matchId}`).once('value').then(snap => {
+                const m = snap.val();
+                if (!m) return;
+                
+                currentEditingMatchId = matchId;
+                document.getElementById('schedule-title').innerText = 'עריכת משחק';
+                document.getElementById('sched-p1').value = m.p1;
+                document.getElementById('sched-p2').value = m.p2;
+                document.getElementById('sched-time').value = m.time || '';
+                document.getElementById('sched-date').value = m.date || '';
+                document.getElementById('sched-bracket-phase').value = m.bracketPhase || '';
+                document.getElementById('sched-bracket-index').value = m.bracketIndex || '0';
+                
+                document.getElementById('schedule-overlay').classList.remove('translate-y-full');
+            });
         };
 
         window.saveSchedule = function() {
@@ -553,7 +582,6 @@
             const time = document.getElementById('sched-time').value;
             const date = document.getElementById('sched-date').value;
 
-            if (!time || !date) return alert("אנא בחר תאריך ושעה");
             if (p1 === p2) return alert("בחר שחקנים שונים");
 
             const bracketPhase = document.getElementById('sched-bracket-phase').value;
@@ -569,9 +597,14 @@
             
             if (!window.db) return alert("Database not connected");
 
-            window.db.ref('upcomingMatches').push(matchData);
+            if (currentEditingMatchId) {
+                window.db.ref(`upcomingMatches/${currentEditingMatchId}`).update(matchData);
+                alert('המשחק עודכן בהצלחה!');
+            } else {
+                window.db.ref('upcomingMatches').push(matchData);
+                alert('המשחק נוסף לתור!');
+            }
             
-            alert('המשחק נוסף לתור!');
             window.closeSchedule();
         };
 
@@ -786,6 +819,9 @@
                             <span class="font-bold text-sm">${m.p1} <span class="text-primary mx-1">VS</span> ${m.p2}</span>
                         </div>
                         <div class="flex gap-2">
+                            <button onclick="window.editUpcomingMatch('${m.id}')" class="bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white w-9 h-9 flex items-center justify-center rounded-xl transition-all">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
                             <button onclick="window.deleteUpcomingMatch('${m.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white w-9 h-9 flex items-center justify-center rounded-xl transition-all">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
