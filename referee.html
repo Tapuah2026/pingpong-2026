@@ -421,6 +421,7 @@
                     currentSet = data.currentSet || 1;
                     liveP1 = data.p1 || '---';
                     liveP2 = data.p2 || '---';
+                    window.currentMatchId = data.matchId || null;
                     window.liveBracketPhase = data.bracketPhase || null;
                     window.liveBracketIndex = data.bracketIndex || null;
                     
@@ -627,7 +628,8 @@
                 window.db.ref('liveMatch').set({
                     score1, score2, sets1, sets2, currentSet,
                     p1: match.p1,
-                    p2: match.p2
+                    p2: match.p2,
+                    matchId: firebaseKey
                 });
             });
         };
@@ -651,9 +653,12 @@
 
                 window.db.ref('completedMatches').push(matchData);
                 
+                // Delete predictions for this match
+                window.db.ref(`predictions/${window.currentMatchId}`).remove();
+
                 window.db.ref('liveMatch').set({
                     score1: 0, score2: 0, sets1: 0, sets2: 0, currentSet: 1,
-                    p1: '---', p2: '---'
+                    p1: '---', p2: '---', matchId: null
                 });
 
                 alert('התוצאה נשמרה בהצלחה!');

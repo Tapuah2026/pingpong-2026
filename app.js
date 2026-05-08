@@ -591,6 +591,31 @@ function initAppListeners() {
         const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p2) : null;
         if (p1Base) document.getElementById('p1-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base.seed}`;
         if (p2Base) document.getElementById('p2-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base.seed}`;
+
+        // Handle Predictions
+        const p1Pred = document.getElementById('p1-prediction');
+        const p2Pred = document.getElementById('p2-prediction');
+        if (data.matchId && predictions[data.matchId]) {
+            const matchPredictions = predictions[data.matchId];
+            const total = Object.keys(matchPredictions).length;
+            const p1Votes = Object.values(matchPredictions).filter(v => v === data.p1).length;
+            const p2Votes = Object.values(matchPredictions).filter(v => v === data.p2).length;
+            
+            const p1Percent = total > 0 ? Math.round((p1Votes / total) * 100) : 0;
+            const p2Percent = total > 0 ? Math.round((p2Votes / total) * 100) : 0;
+            
+            if (p1Pred) {
+                p1Pred.innerText = `${p1Percent}%`;
+                p1Pred.classList.remove('hidden');
+            }
+            if (p2Pred) {
+                p2Pred.innerText = `${p2Percent}%`;
+                p2Pred.classList.remove('hidden');
+            }
+        } else {
+            if (p1Pred) p1Pred.classList.add('hidden');
+            if (p2Pred) p2Pred.classList.add('hidden');
+        }
     });
 
     // 2. Upcoming Matches Listener
