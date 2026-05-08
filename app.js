@@ -50,6 +50,7 @@ window.switchView = function (viewId) {
 
 let calculatedPlayers = [];
 let playerVotes = {}; // { playerId: { userId: 'up' | 'down' } }
+let predictions = {}; // { matchId: { userId: 'playerName' } }
 
 // --- Stats Calculation Engine ---
 function calculatePlayerStats(completedMatches) {
@@ -544,6 +545,18 @@ function initAppListeners() {
         renderPlayers();
     });
 
+    // 0.1 Predictions Listener
+    window.db.ref('predictions').on('value', (snapshot) => {
+        predictions = snapshot.val() || {};
+        // Trigger re-render of upcoming matches if they are already rendered
+        // In this app, upcoming matches are rendered when the upcomingMatches ref changes
+        // but we might need to manually trigger it or just wait for the next sync.
+        // Actually, we can just trigger the upcomingMatches update logic manually.
+        window.db.ref('upcomingMatches').once('value', (snap) => {
+            updateUpcomingUI(snap.val());
+        });
+    });
+
     // 1. Live Match Listener
     window.db.ref('liveMatch').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -582,42 +595,89 @@ function initAppListeners() {
 
     // 2. Upcoming Matches Listener
     window.db.ref('upcomingMatches').on('value', (snapshot) => {
-        const container = document.getElementById('home-upcoming-queue');
-        if (!container) return;
+        updateUpcomingUI(snapshot.val());
+    });
+}
 
-        const data = snapshot.val();
-        if (!data) {
-            container.innerHTML = '<p class="text-white/30 text-sm text-center py-4 bg-white/5 rounded-xl">No upcoming matches</p>';
-            return;
-        }
+function updateUpcomingUI(data) {
+    const container = document.getElementById('home-upcoming-queue');
+    if (!container) return;
 
-        const upcoming = Object.values(data);
-        container.innerHTML = upcoming.map(m => {
-            const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p1) : null;
-            const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p2) : null;
-            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : m.p1}`;
-            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : m.p2}`;
+    if (!data) {
+        container.innerHTML = '<p class="text-white/30 text-sm text-center py-4 bg-white/5 rounded-xl">No upcoming matches</p>';
+        return;
+    }
 
-            return `
-                <div class="glass-panel p-3 rounded-xl flex items-center gap-3 animate-fade-in-up">
+    const entries = Object.entries(data);
+    container.innerHTML = entries.map(([matchId, m]) => {
+        const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p1) : null;
+        const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p2) : null;
+        const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : m.p1}`;
+        const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : m.p2}`;
+
+        const matchPredictions = predictions[matchId] || {};
+        const totalVotes = Object.keys(matchPredictions).length;
+        const p1Votes = Object.values(matchPredictions).filter(v => v === m.p1).length;
+        const p2Votes = Object.values(matchPredictions).filter(v => v === m.p2).length;
+        
+        const userPrediction = matchPredictions[userId];
+        const hasVoted = !!userPrediction;
+
+        const p1Percent = totalVotes > 0 ? Math.round((p1Votes / totalVotes) * 100) : 0;
+        const p2Percent = totalVotes > 0 ? Math.round((p2Votes / totalVotes) * 100) : 0;
+
+        return `
+            <div class="glass-panel p-3 rounded-xl flex flex-col gap-3 animate-fade-in-up overflow-hidden relative">
+                <div class="flex items-center gap-3">
                     <div class="text-center w-16 border-r border-white/10 pr-2">
                         <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'היום'}</div>
                         <div class="font-bold text-primary">${m.time}</div>
                     </div>
                     <div class="flex-1 flex items-center justify-between pl-2">
-                        <div class="flex items-center gap-2">
-                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10">
-                            <span class="text-sm font-semibold">${m.p1.split(' ')[0]}</span>
+                        <!-- Player 1 -->
+                        <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-transform active:scale-95 group">
+                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 ${userPrediction === m.p1 ? 'ring-2 ring-primary' : ''}">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-semibold ${userPrediction === m.p1 ? 'text-primary' : ''}">${m.p1.split(' ')[0]}</span>
+                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p1Percent}%</span>` : ''}
+                            </div>
                         </div>
-                        <span class="text-white/30 text-xs px-2">vs</span>
-                        <div class="flex items-center gap-2 flex-row-reverse">
-                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10">
-                            <span class="text-sm font-semibold">${m.p2.split(' ')[0]}</span>
+                        
+                        <span class="text-white/20 text-[10px] font-black uppercase tracking-tighter">VS</span>
+                        
+                        <!-- Player 2 -->
+                        <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-transform active:scale-95 group">
+                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 ${userPrediction === m.p2 ? 'ring-2 ring-primary' : ''}">
+                            <div class="flex flex-col items-end">
+                                <span class="text-sm font-semibold ${userPrediction === m.p2 ? 'text-primary' : ''}">${m.p2.split(' ')[0]}</span>
+                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p2Percent}%</span>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-            `;
-        }).join('');
+                
+                ${hasVoted ? `
+                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden flex">
+                    <div class="bg-primary h-full transition-all duration-500" style="width: ${p1Percent}%"></div>
+                    <div class="bg-white/10 h-full transition-all duration-500" style="width: ${p2Percent}%"></div>
+                </div>
+                ` : `
+                <div class="text-[9px] text-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
+                `}
+            </div>
+        `;
+    }).join('');
+}
+
+window.submitPrediction = function(matchId, playerName) {
+    if (!window.db) return;
+    const predRef = window.db.ref(`predictions/${matchId}/${userId}`);
+    predRef.once('value', (snap) => {
+        if (snap.val() === playerName) {
+            predRef.remove(); // Toggle off
+        } else {
+            predRef.set(playerName);
+        }
     });
 
     // 3. Completed Matches & Results Listener
