@@ -51,6 +51,7 @@ window.switchView = function (viewId) {
 let calculatedPlayers = [];
 let playerVotes = {}; // { playerId: { userId: 'up' | 'down' } }
 let predictions = {}; // { matchId: { userId: 'playerName' } }
+let playerImages = {}; // { playerName: base64 }
 
 // --- Stats Calculation Engine ---
 function calculatePlayerStats(completedMatches) {
@@ -108,6 +109,14 @@ function calculatePlayerStats(completedMatches) {
     return stats;
 }
 
+function getPlayerAvatar(playerName) {
+    const key = playerName.replace(/[.#$[\]]/g, '_');
+    if (playerImages && playerImages[key]) {
+        return playerImages[key];
+    }
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+}
+
 // --- Render Groups ---
 function renderGroups() {
     const container = document.getElementById('groups-container');
@@ -135,7 +144,7 @@ function renderGroups() {
                 <div class="flex items-center px-3 py-2.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
                     <div class="w-6 font-bold text-xs ${rankColor}">${index + 1}</div>
                     <div class="flex-1 font-medium flex items-center gap-2.5 text-sm truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-7 h-7 rounded-full bg-white shadow-sm">
+                        <img src="${getPlayerAvatar(p.name)}" class="w-7 h-7 rounded-full bg-white shadow-sm">
                         <span class="truncate">${p.name}</span>
                     </div>
                     <div class="w-14 text-center font-mono text-xs text-white/50">${p.wins}-${p.losses}</div>
@@ -186,7 +195,7 @@ function renderPlayers() {
             <div class="glass-panel rounded-2xl p-3 flex items-center justify-between animate-fade-in-up">
                 <div class="flex items-center gap-3 flex-1" onclick="window.openPlayerModal(${p.id})">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-0.5">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full rounded-full bg-white">
+                        <img src="${getPlayerAvatar(p.name)}" class="w-full h-full rounded-full bg-white">
                     </div>
                     <div class="flex flex-col">
                         <h3 class="font-bold text-sm text-white">${p.name}</h3>
@@ -241,7 +250,7 @@ window.openPlayerModal = function (playerId) {
     const p = calculatedPlayers.find(player => player.id === playerId);
     if (!p) return;
 
-    document.getElementById('modal-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+    document.getElementById('modal-img').src = getPlayerAvatar(p.name);
     document.getElementById('modal-name').innerText = p.name;
     document.getElementById('modal-rank').innerText = `בית ${p.group} • ${p.played} משחקים`;
     document.getElementById('modal-played').innerText = p.played;
@@ -506,14 +515,14 @@ function renderBracket(phase) {
                 <div class="flex flex-col gap-2 flex-1 w-full">
                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <img src="${getPlayerAvatar(p1.name)}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <img src="${getPlayerAvatar(p2.name)}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
@@ -557,6 +566,28 @@ function initAppListeners() {
         });
     });
 
+    window.db.ref('playerImages').on('value', (snapshot) => {
+        playerImages = snapshot.val() || {};
+        // Re-render everything that uses avatars
+        renderGroups();
+        renderPlayers();
+        renderBracket('round16');
+        renderBracket('quarters');
+        renderBracket('semis');
+        renderBracket('final');
+        // Live match will update automatically via its listener if it calls getPlayerAvatar
+        // but we might need to nudge it. 
+        // Actually, the listener above for liveMatch will trigger on its own, 
+        // but if ONLY playerImages change, we should refresh the live card manually.
+        window.db.ref('liveMatch').once('value', (snap) => {
+            const data = snap.val();
+            if (data && data.p1 !== '---') {
+                document.getElementById('p1-img').src = getPlayerAvatar(data.p1);
+                document.getElementById('p2-img').src = getPlayerAvatar(data.p2);
+            }
+        });
+    });
+
     // 1. Live Match Listener
     window.db.ref('liveMatch').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -589,8 +620,8 @@ function initAppListeners() {
 
         const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p1) : null;
         const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p2) : null;
-        if (p1Base) document.getElementById('p1-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
-        if (p2Base) document.getElementById('p2-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+        if (p1Base) document.getElementById('p1-img').src = getPlayerAvatar(data.p1);
+        if (p2Base) document.getElementById('p2-img').src = getPlayerAvatar(data.p2);
 
         // Handle Predictions
         const p1Pred = document.getElementById('p1-prediction');
@@ -642,8 +673,8 @@ function updateUpcomingUI(data) {
 
     const entries = Object.entries(data);
     container.innerHTML = entries.map(([matchId, m]) => {
-        const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
-        const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+        const p1Img = getPlayerAvatar(m.p1);
+        const p2Img = getPlayerAvatar(m.p2);
 
         const matchPredictions = predictions[matchId] || {};
         const totalVotes = Object.keys(matchPredictions).length;
@@ -743,8 +774,8 @@ window.submitPrediction = function(matchId, playerName) {
         matches.forEach(match => {
             const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p1) : null;
             const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p2) : null;
-            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
-            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+            const p1Img = getPlayerAvatar(match.p1);
+            const p2Img = getPlayerAvatar(match.p2);
             const isP1Winner = match.sets1 > match.sets2;
 
             const card = document.createElement('div');

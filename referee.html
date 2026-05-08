@@ -259,6 +259,27 @@
             </div>
 
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                <h3 class="font-bold mb-2 text-primary">ניהול תמונות שחקנים</h3>
+                <p class="text-xs text-white/50 mb-4">בחר שחקן והעלה תמונה שתופיע בכל חלקי האפליקציה.</p>
+                <div class="space-y-4">
+                    <select id="img-player-select" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary">
+                        <!-- Populated by JS -->
+                    </select>
+                    <div class="flex items-center gap-3">
+                        <label for="player-image-file" class="flex-1 bg-white/5 border border-dashed border-white/20 rounded-xl py-4 flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+                            <i class="fa-solid fa-camera text-xl mb-1 text-primary"></i>
+                            <span id="player-file-status" class="text-[10px] text-white/50">בחר תמונה</span>
+                            <input type="file" id="player-image-file" accept="image/*" class="hidden">
+                        </label>
+                        <div id="player-image-preview" class="w-16 h-16 rounded-xl bg-white/5 border border-white/10 hidden overflow-hidden">
+                            <img src="" id="player-preview-img" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <button onclick="window.savePlayerImage()" class="w-full bg-blue-500 py-3 rounded-xl font-bold text-sm">שמור תמונת שחקן</button>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl border border-white/10">
                 <h3 class="font-bold mb-2">מחיקת כל הנתונים</h3>
                 <p class="text-xs text-white/50 mb-4">פעולה זו תמחק את כל המשחקים, החדשות והתוצאות. אין דרך חזרה!</p>
                 <button onclick="window.resetTournament()" class="w-full bg-white/5 border border-red-500/50 text-red-500 py-3 rounded-xl font-bold text-sm">איפוס טורניר מלא</button>
@@ -736,6 +757,56 @@
             reader.readAsDataURL(file);
         });
 
+        };
+
+        let selectedPlayerImageBase64 = null;
+
+        document.getElementById('player-image-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('player-file-status').innerText = "מעבד...";
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400; // Even smaller for player avatars
+                    const scale = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scale;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    selectedPlayerImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                    
+                    document.getElementById('player-preview-img').src = selectedPlayerImageBase64;
+                    document.getElementById('player-image-preview').classList.remove('hidden');
+                    document.getElementById('player-file-status').innerText = "מוכן!";
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        window.savePlayerImage = function() {
+            const playerName = document.getElementById('img-player-select').value;
+            if (!playerName || !selectedPlayerImageBase64) return alert("אנא בחר שחקן ותמונה");
+
+            if(!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");
+
+            window.db.ref('playerImages').child(playerName.replace(/[.#$[\]]/g, '_')).set(selectedPlayerImageBase64).then(() => {
+                alert('תמונת השחקן עודכנה בהצלחה!');
+                // Reset
+                document.getElementById('player-image-file').value = '';
+                document.getElementById('player-image-preview').classList.add('hidden');
+                document.getElementById('player-file-status').innerText = "בחר תמונה";
+                selectedPlayerImageBase64 = null;
+            });
+        };
+
         window.saveNews = function() {
             const title = document.getElementById('news-title').value;
             const text = document.getElementById('news-text').value;
@@ -853,6 +924,7 @@
             p2Select.innerHTML = options;
             m1Select.innerHTML = options;
             m2Select.innerHTML = options;
+            if (document.getElementById('img-player-select')) document.getElementById('img-player-select').innerHTML = options;
             
             if (players.length > 1) {
                 p2Select.selectedIndex = 1;
