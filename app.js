@@ -252,7 +252,11 @@ window.openPlayerModal = function (playerId) {
 
     document.getElementById('modal-img').src = getPlayerAvatar(p.name);
     document.getElementById('modal-name').innerText = p.name;
-    document.getElementById('modal-rank').innerHTML = `בית ${p.group} &bull; ${p.played} משחקים`;
+    document.getElementById('modal-rank').innerHTML = `
+        <span>בית ${p.group}</span>
+        <span class="opacity-50">&bull;</span>
+        <span>${p.played} משחקים</span>
+    `;
     document.getElementById('modal-played').innerText = p.played;
     document.getElementById('modal-winrate').innerText = `${p.winRate}%`;
     document.getElementById('modal-points').innerText = p.points > 0 ? `+${p.points}` : p.points;
