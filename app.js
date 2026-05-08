@@ -135,7 +135,7 @@ function renderGroups() {
                 <div class="flex items-center px-3 py-2.5 border-t border-white/5 ${index === 0 ? 'bg-white/5' : ''}">
                     <div class="w-6 font-bold text-xs ${rankColor}">${index + 1}</div>
                     <div class="flex-1 font-medium flex items-center gap-2.5 text-sm truncate">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed || 'none'}" class="w-7 h-7 rounded-full bg-white shadow-sm">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-7 h-7 rounded-full bg-white shadow-sm">
                         <span class="truncate">${p.name}</span>
                     </div>
                     <div class="w-14 text-center font-mono text-xs text-white/50">${p.wins}-${p.losses}</div>
@@ -506,14 +506,14 @@ function renderBracket(phase) {
                 <div class="flex flex-col gap-2 flex-1 w-full">
                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p1.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
                         <div class="flex items-center gap-2.5">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p2.seed}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
                             <span class="text-sm font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
@@ -743,8 +743,8 @@ window.submitPrediction = function(matchId, playerName) {
         matches.forEach(match => {
             const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p1) : null;
             const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === match.p2) : null;
-            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : match.p1}`;
-            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : match.p2}`;
+            const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+            const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
             const isP1Winner = match.sets1 > match.sets2;
 
             const card = document.createElement('div');
