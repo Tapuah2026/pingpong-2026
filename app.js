@@ -178,6 +178,7 @@ function renderPlayers() {
         const crownVotes = Object.values(votes).filter(v => v === 'crown').length;
         const zeroVotes = Object.values(votes).filter(v => v === 'zero').length;
         const middleVotes = Object.values(votes).filter(v => v === 'middle').length;
+        const palestineVotes = Object.values(votes).filter(v => v === 'palestine').length;
         const userVote = votes[userId];
 
         list.innerHTML += `
@@ -192,20 +193,25 @@ function renderPlayers() {
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-3 bg-white/5 px-3 py-2 rounded-xl">
+                <div class="flex items-center gap-2 bg-white/5 px-2 py-2 rounded-xl">
                     <button onclick="window.togglePlayerVote(${p.id}, 'crown')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'crown' ? 'text-yellow-400 scale-110' : 'text-white/30 hover:text-white/60'}">
-                        <i class="fa-solid fa-crown text-sm"></i>
-                        <span class="text-[10px] font-bold font-mono">${crownVotes}</span>
+                        <i class="fa-solid fa-crown text-[12px]"></i>
+                        <span class="text-[9px] font-bold font-mono">${crownVotes}</span>
                     </button>
                     <div class="w-[1px] h-3 bg-white/10"></div>
                     <button onclick="window.togglePlayerVote(${p.id}, 'zero')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'zero' ? 'text-red-400 scale-110' : 'text-white/30 hover:text-white/60'}">
-                        <i class="fa-solid fa-0 text-sm"></i>
-                        <span class="text-[10px] font-bold font-mono">${zeroVotes}</span>
+                        <i class="fa-solid fa-0 text-[12px]"></i>
+                        <span class="text-[9px] font-bold font-mono">${zeroVotes}</span>
                     </button>
                     <div class="w-[1px] h-3 bg-white/10"></div>
                     <button onclick="window.togglePlayerVote(${p.id}, 'middle')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'middle' ? 'text-purple-400 scale-110' : 'text-white/30 hover:text-white/60'}">
-                        <span class="text-sm">🖕</span>
-                        <span class="text-[10px] font-bold font-mono">${middleVotes}</span>
+                        <span class="text-[12px]">🖕</span>
+                        <span class="text-[9px] font-bold font-mono">${middleVotes}</span>
+                    </button>
+                    <div class="w-[1px] h-3 bg-white/10"></div>
+                    <button onclick="window.togglePlayerVote(${p.id}, 'palestine')" class="flex flex-col items-center gap-1 transition-all ${userVote === 'palestine' ? 'scale-110' : 'opacity-40 hover:opacity-100'}">
+                        <span class="text-[12px]">🇵🇸</span>
+                        <span class="text-[9px] font-bold font-mono ${userVote === 'palestine' ? 'text-green-400' : 'text-white/30'}">${palestineVotes}</span>
                     </button>
                 </div>
             </div>
