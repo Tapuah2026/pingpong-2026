@@ -657,12 +657,18 @@ function updateUpcomingUI(data) {
                 </div>
                 
                 ${hasVoted ? `
-                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden flex">
-                    <div class="bg-primary h-full transition-all duration-500" style="width: ${p1Percent}%"></div>
-                    <div class="bg-white/10 h-full transition-all duration-500" style="width: ${p2Percent}%"></div>
+                <div class="flex items-center gap-3">
+                    <div class="w-16 pr-2"></div>
+                    <div class="flex-1 h-1 bg-white/5 rounded-full overflow-hidden flex">
+                        <div class="bg-primary h-full transition-all duration-500" style="width: ${p1Percent}%"></div>
+                        <div class="bg-white/10 h-full transition-all duration-500" style="width: ${p2Percent}%"></div>
+                    </div>
                 </div>
                 ` : `
-                <div class="text-[9px] text-center w-full flex justify-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
+                <div class="flex items-center gap-3">
+                    <div class="w-16 pr-2"></div>
+                    <div class="flex-1 text-[9px] text-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
+                </div>
                 `}
             </div>
         `;
