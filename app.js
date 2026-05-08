@@ -186,7 +186,7 @@ function renderPlayers() {
             <div class="glass-panel rounded-2xl p-3 flex items-center justify-between animate-fade-in-up">
                 <div class="flex items-center gap-3 flex-1" onclick="window.openPlayerModal(${p.id})">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-0.5">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.seed}" class="w-full h-full rounded-full bg-white">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full rounded-full bg-white">
                     </div>
                     <div class="flex flex-col">
                         <h3 class="font-bold text-sm text-white">${p.name}</h3>
@@ -589,8 +589,8 @@ function initAppListeners() {
 
         const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p1) : null;
         const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p2) : null;
-        if (p1Base) document.getElementById('p1-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base.seed}`;
-        if (p2Base) document.getElementById('p2-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base.seed}`;
+        if (p1Base) document.getElementById('p1-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+        if (p2Base) document.getElementById('p2-img').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
 
         // Handle Predictions
         const p1Pred = document.getElementById('p1-prediction');
@@ -642,10 +642,8 @@ function updateUpcomingUI(data) {
 
     const entries = Object.entries(data);
     container.innerHTML = entries.map(([matchId, m]) => {
-        const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p1) : null;
-        const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === m.p2) : null;
-        const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p1Base ? p1Base.seed : m.p1}`;
-        const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p2Base ? p2Base.seed : m.p2}`;
+        const p1Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
+        const p2Img = `https://api.dicebear.com/7.x/avataaars/svg?seed=Felix`;
 
         const matchPredictions = predictions[matchId] || {};
         const totalVotes = Object.keys(matchPredictions).length;
