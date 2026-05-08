@@ -662,7 +662,7 @@ function updateUpcomingUI(data) {
                     <div class="bg-white/10 h-full transition-all duration-500" style="width: ${p2Percent}%"></div>
                 </div>
                 ` : `
-                <div class="text-[9px] text-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
+                <div class="text-[9px] text-center w-full flex justify-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
                 `}
             </div>
         `;
