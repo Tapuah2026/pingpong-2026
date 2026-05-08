@@ -484,6 +484,7 @@
                 score1, score2, sets1, sets2, currentSet,
                 p1: document.getElementById('ref-p1-name').innerText,
                 p2: document.getElementById('ref-p2-name').innerText,
+                matchId: window.currentMatchId || null,
                 bracketPhase: window.liveBracketPhase || null,
                 bracketIndex: window.liveBracketIndex || null
             }).catch(err => {
