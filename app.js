@@ -635,33 +635,33 @@ function updateUpcomingUI(data) {
                     </div>
                     <div class="flex-1 flex items-center justify-between pl-2">
                         <!-- Player 1 -->
-                        <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-transform active:scale-95 group">
-                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 ${userPrediction === m.p1 ? 'ring-2 ring-primary' : ''}">
+                        <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-all active:scale-95 group">
+                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 ${userPrediction === m.p1 ? 'ring-2 ring-primary scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
                             <div class="flex flex-col">
-                                <span class="text-sm font-semibold ${userPrediction === m.p1 ? 'text-primary' : ''}">${m.p1.split(' ')[0]}</span>
-                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p1Percent}%</span>` : ''}
+                                <span class="text-sm font-semibold transition-colors ${userPrediction === m.p1 ? 'text-primary' : 'text-white/70'}">${m.p1.split(' ')[0]}</span>
+                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30 animate-slide-down">${p1Percent}%</span>` : ''}
                             </div>
                         </div>
                         
                         <span class="text-white/20 text-[10px] font-black uppercase tracking-tighter">VS</span>
                         
                         <!-- Player 2 -->
-                        <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-transform active:scale-95 group">
-                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 ${userPrediction === m.p2 ? 'ring-2 ring-primary' : ''}">
+                        <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-all active:scale-95 group">
+                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 ${userPrediction === m.p2 ? 'ring-2 ring-primary scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
                             <div class="flex flex-col items-end">
-                                <span class="text-sm font-semibold ${userPrediction === m.p2 ? 'text-primary' : ''}">${m.p2.split(' ')[0]}</span>
-                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p2Percent}%</span>` : ''}
+                                <span class="text-sm font-semibold transition-colors ${userPrediction === m.p2 ? 'text-primary' : 'text-white/70'}">${m.p2.split(' ')[0]}</span>
+                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30 animate-slide-down">${p2Percent}%</span>` : ''}
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 ${hasVoted ? `
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 animate-slide-down">
                     <div class="w-16 pr-2"></div>
                     <div class="flex-1 h-1 bg-white/5 rounded-full overflow-hidden flex">
-                        <div class="bg-primary h-full transition-all duration-500" style="width: ${p1Percent}%"></div>
-                        <div class="bg-white/10 h-full transition-all duration-500" style="width: ${p2Percent}%"></div>
+                        <div class="bg-primary h-full transition-all duration-700 ease-out" style="width: ${p1Percent}%"></div>
+                        <div class="bg-white/10 h-full transition-all duration-700 ease-out" style="width: ${p2Percent}%"></div>
                     </div>
                 </div>
                 ` : `
