@@ -339,9 +339,14 @@
         <div class="text-center mb-6 mt-4">
             <span id="ref-set-label" class="text-sm font-bold text-primary uppercase tracking-widest">מערכה 1</span>
             <div class="text-xl font-mono text-primary font-bold" id="ref-timer">08:30</div>
-            <button onclick="window.resetMatch()" class="text-white/30 hover:text-white transition-colors mt-2">
-                <i class="fa-solid fa-rotate-left"></i> איפוס
-            </button>
+            <div class="flex justify-center gap-4 mt-2">
+                <button onclick="window.resetMatch()" class="text-white/30 hover:text-white transition-colors">
+                    <i class="fa-solid fa-rotate-left"></i> איפוס נק'
+                </button>
+                <button onclick="window.cancelMatch()" class="text-red-500/50 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-trash-can"></i> ביטול משחק
+                </button>
+            </div>
         </div>
 
         <div class="flex-1 flex flex-col gap-6">
@@ -685,6 +690,15 @@
             }
         };
 
+        window.cancelMatch = function() {
+            if(confirm('האם אתה בטוח שברצונך לבטל את המשחק הנוכחי ולמחוק אותו מהשידור?')) {
+                if(!window.db) return;
+                window.db.ref('liveMatch').set({
+                    score1: 0, score2: 0, sets1: 0, sets2: 0, currentSet: 1,
+                    p1: '---', p2: '---', matchId: null
+                });
+            }
+        };
 
         window.saveManualResult = function() {
             const p1 = document.getElementById('man-p1').value;
