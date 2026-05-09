@@ -480,14 +480,14 @@ function renderBracket(phase) {
         const bestThirds = allThirdPlaces.slice(0, 2);
 
         const pairings = [
-            { m: 1, s: 1, g: 'A', r: 0 }, { m: 1, s: 2, g: 'B', r: 1 },
-            { m: 2, s: 1, g: 'C', r: 0 }, { m: 2, s: 2, g: 'D', r: 1 },
-            { m: 3, s: 1, g: 'E', r: 0 }, { m: 3, s: 2, g: 'F', r: 1 },
-            { m: 4, s: 1, g: 'G', r: 0 }, { m: 4, s: 2, type: 'bestThird', idx: 0 },
-            { m: 5, s: 1, g: 'B', r: 0 }, { m: 5, s: 2, g: 'A', r: 1 },
-            { m: 6, s: 1, g: 'D', r: 0 }, { m: 6, s: 2, g: 'C', r: 1 },
-            { m: 7, s: 1, g: 'F', r: 0 }, { m: 7, s: 2, g: 'E', r: 1 },
-            { m: 8, s: 1, type: 'bestThird', idx: 1 }, { m: 8, s: 2, g: 'G', r: 1 }
+            { m: 1, s: 1, g: 'בית תורמוס', r: 0 }, { m: 1, s: 2, g: 'בית סינג\'יל', r: 1 },
+            { m: 2, s: 1, g: 'בית שילה', r: 0 }, { m: 2, s: 2, g: 'בית עלי', r: 1 },
+            { m: 3, s: 1, g: 'בית לובאן', r: 0 }, { m: 3, s: 2, g: 'בית הדורבן', r: 1 },
+            { m: 4, s: 1, g: 'בית ששון', r: 0 }, { m: 4, s: 2, type: 'bestThird', idx: 0 },
+            { m: 5, s: 1, g: 'בית סינג\'יל', r: 0 }, { m: 5, s: 2, g: 'בית תורמוס', r: 1 },
+            { m: 6, s: 1, g: 'בית עלי', r: 0 }, { m: 6, s: 2, g: 'בית שילה', r: 1 },
+            { m: 7, s: 1, g: 'בית הדורבן', r: 0 }, { m: 7, s: 2, g: 'בית לובאן', r: 1 },
+            { m: 8, s: 1, type: 'bestThird', idx: 1 }, { m: 8, s: 2, g: 'בית ששון', r: 1 }
         ];
 
         pairings.forEach(p => {
