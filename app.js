@@ -750,8 +750,11 @@ window.submitPrediction = function(matchId, playerName) {
             predRef.set(playerName);
         }
     });
+};
 
-    // 3. Completed Matches & Results Listener
+// 3. Completed Matches & Results Listener
+function initCompletedMatchesListener() {
+    if (!window.db) return;
     window.db.ref('completedMatches').on('value', (snapshot) => {
         const data = snapshot.val();
         allCompletedMatches = data ? Object.values(data) : [];
@@ -806,8 +809,11 @@ window.submitPrediction = function(matchId, playerName) {
             container.appendChild(card);
         });
     });
+}
 
-    // 4. Tournament State Listener
+// 4. Tournament State Listener
+function initTournamentStateListener() {
+    if (!window.db) return;
     window.db.ref('tournamentState').on('value', (snapshot) => {
         const state = snapshot.val() || {};
         isGroupsClosed = !!state.isGroupsClosed;
@@ -819,8 +825,11 @@ window.submitPrediction = function(matchId, playerName) {
         renderBracket('semis');
         renderBracket('final');
     });
+}
 
-    // 5. News Listener
+// 5. News Listener
+function initNewsListener() {
+    if (!window.db) return;
     window.db.ref('news').on('value', (snapshot) => {
         const container = document.getElementById('news-container');
         if (!container) return;
@@ -911,6 +920,14 @@ window.submitPrediction = function(matchId, playerName) {
     });
 }
 
+// Initialize all global listeners
+function initAllListeners() {
+    initAppListeners();
+    initCompletedMatchesListener();
+    initTournamentStateListener();
+    initNewsListener();
+}
+
 // --- Page Load Handling ---
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -925,7 +942,7 @@ window.addEventListener('load', () => {
     }
 });
 
-initAppListeners();
+initAllListeners();
 
 // Initial render with empty stats
 calculatedPlayers = calculatePlayerStats(null);
