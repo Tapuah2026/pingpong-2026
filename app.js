@@ -819,7 +819,7 @@ function initCompletedMatchesListener() {
                         <img src="${p2Img}" class="w-10 h-10 rounded-full bg-white/10 p-0.5 ${!isP1Winner ? 'ring-2 ring-primary' : ''}">
                     </div>
                 </div>
-                <div class="text-center text-xs text-white/30">סה"כ נקודות: ${match.score1} - ${match.score2}</div>
+
             `;
             container.appendChild(card);
         });
