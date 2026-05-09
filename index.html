@@ -1,4 +1,5 @@
 <html lang="he" dir="rtl" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -29,34 +30,47 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&family=Inter:wght@400;500;700&display=swap');
-        body { font-family: 'Heebo', 'Inter', sans-serif; background-color: #0f172a; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; width: 100%; }
+
+        body {
+            font-family: 'Heebo', 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: white;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         /* Splash Screen Gates */
         #loader-wrapper {
             position: fixed;
             inset: 0;
             z-index: 9999;
             display: flex;
-            flex-direction: column; /* Vertical split */
+            flex-direction: column;
+            /* Vertical split */
             overflow: hidden;
         }
+
         .gate {
             width: 100%;
             height: 50%;
             background: #0f172a;
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px);
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255, 255, 255, 0.02) 40px, rgba(255, 255, 255, 0.02) 41px);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 1.5s cubic-bezier(0.8, 0, 0.2, 1);
             position: relative;
         }
-        .gate-left { 
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+
+        .gate-left {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
-        .gate-right { 
-            border-top: 2px solid rgba(255,255,255,0.1);
+
+        .gate-right {
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         #loader-content {
             position: absolute;
             left: 50%;
@@ -66,20 +80,41 @@
             text-align: center;
             transition: opacity 0.5s ease;
         }
+
         .phase-btn {
             @apply px-5 py-2 text-sm font-bold text-white/40 whitespace-nowrap transition-all rounded-full;
         }
+
         .phase-btn.active {
-            @apply text-white bg-primary shadow-[0_0_15px_rgba(239,68,68,0.4)];
+            @apply text-white bg-primary shadow-[0_0_15px_rgba(239, 68, 68, 0.4)];
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         /* Scroll Snapping for Tournament Slides */
-        .snap-container { scroll-snap-type: x mandatory; overflow-x: auto; display: flex; scroll-behavior: smooth; }
-        .snap-slide { scroll-snap-align: center; min-width: 100%; flex: 0 0 100%; }
+        .snap-container {
+            scroll-snap-type: x mandatory;
+            overflow-x: auto;
+            display: flex;
+            scroll-behavior: smooth;
+        }
 
-        #groups-view { padding-top: 0; }
+        .snap-slide {
+            scroll-snap-align: center;
+            min-width: 100%;
+            flex: 0 0 100%;
+        }
+
+        #groups-view {
+            padding-top: 0;
+        }
 
         .loader-logo {
             width: 280px;
@@ -88,17 +123,41 @@
             animation: bounce-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), pulse-red 2.5s infinite ease-in-out;
             animation-delay: 0s, 1.2s;
         }
+
         @keyframes pulse-red {
-            0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5)); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 60px rgba(239, 68, 68, 0.9)); transform: scale(1.05); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5));
+                transform: scale(1);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 60px rgba(239, 68, 68, 0.9));
+                transform: scale(1.05);
+            }
         }
+
         @keyframes bounce-in {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 1; }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
-        
+
         .loader-text {
             margin-top: 1rem;
             font-weight: 900;
@@ -109,10 +168,22 @@
             opacity: 0.8;
         }
 
-        .gates-open .gate-left { transform: translateY(-100%); }
-        .gates-open .gate-right { transform: translateY(100%); }
-        .gates-open #loader-content { opacity: 0; pointer-events: none; }
-        .gates-open #loader-wrapper { pointer-events: none; }
+        .gates-open .gate-left {
+            transform: translateY(-100%);
+        }
+
+        .gates-open .gate-right {
+            transform: translateY(100%);
+        }
+
+        .gates-open #loader-content {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .gates-open #loader-wrapper {
+            pointer-events: none;
+        }
 
         .glass-panel {
             background: rgba(30, 41, 59, 0.7);
@@ -120,28 +191,51 @@
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         @keyframes slide-down-fade {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .animate-slide-down {
             animation: slide-down-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
         @keyframes rotate-glow {
-            0% { box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444; }
-            50% { box-shadow: 0 0 15px #ef4444, 0 0 25px #ef4444; }
-            100% { box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444; }
+            0% {
+                box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444;
+            }
+
+            50% {
+                box-shadow: 0 0 15px #ef4444, 0 0 25px #ef4444;
+            }
+
+            100% {
+                box-shadow: 0 0 5px #ef4444, 0 0 10px #ef4444;
+            }
         }
+
         .active-ring-glow {
             animation: rotate-glow 2s infinite ease-in-out;
             border-color: #ef4444 !important;
         }
+
         /* Hide scrollbar for clean mobile look */
-        ::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
     <!-- Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body class="pb-32">
     <!-- Splash Screen Loader -->
     <div id="loader-wrapper">
@@ -151,52 +245,61 @@
         </div>
         <div class="gate gate-right"></div>
     </div>
- <!-- Padding bottom for fixed nav -->
+    <!-- Padding bottom for fixed nav -->
 
     <!-- Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center">
+    <header
+        class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <img src="logo_2.png" class="w-10 h-10 object-contain" alt="Logo">
-            <h1 class="font-bold text-lg tracking-tight">פינג פונג 2026</h1>
+            <h1 class="font-bold text-lg tracking-tight">ליגת התפוח 2026</h1>
         </div>
-        <button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" onclick="window.location.href='referee.html'" aria-label="Menu">
+        <button
+            class="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            onclick="window.location.href='referee.html'" aria-label="Menu">
             <i class="fa-solid fa-bars"></i>
         </button>
     </header>
 
     <!-- Main Content -->
     <main class="pt-24 px-4 max-w-md mx-auto pb-32 relative">
-        
+
         <!-- HOME VIEW -->
         <div id="view-home" class="view-section space-y-6">
             <!-- Live Match Card -->
             <section class="animate-fade-in-up">
                 <div class="flex items-center gap-2 mb-3" id="live-match-header" style="display: none">
                     <span class="relative flex h-3 w-3" id="live-ping-icon">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
                     </span>
-                    <h2 class="text-sm font-semibold tracking-wider text-primary uppercase" id="match-status-text">משחק פעיל</h2>
+                    <h2 class="text-sm font-semibold tracking-wider text-primary uppercase" id="match-status-text">משחק
+                        פעיל</h2>
                 </div>
 
                 <div id="no-live-match" class="glass-panel rounded-2xl p-6 text-center text-white/50 hidden">
                     <i class="fa-solid fa-table-tennis-paddle-ball text-3xl mb-2 opacity-30"></i>
                     <p>אין משחק פעיל כרגע</p>
                 </div>
-                
-                <div id="live-match-card" class="glass-panel rounded-2xl p-5 shadow-xl relative overflow-hidden" style="display: none">
+
+                <div id="live-match-card" class="glass-panel rounded-2xl p-5 shadow-xl relative overflow-hidden"
+                    style="display: none">
                     <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
                     <div class="flex justify-between items-center relative z-10">
                         <!-- Player 1 -->
                         <div class="flex flex-col items-center flex-1">
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 p-1 mb-2 shadow-lg">
-                                <img id="p1-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Player 1" class="w-full h-full rounded-full bg-white">
+                            <div
+                                class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 p-1 mb-2 shadow-lg">
+                                <img id="p1-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                                    alt="Player 1" class="w-full h-full rounded-full bg-white">
                             </div>
                             <span class="font-semibold text-sm" id="p1-name">John D.</span>
-                              <div class="flex items-center gap-1.5 mt-1 flex-row-reverse">
+                            <div class="flex items-center gap-1.5 mt-1 flex-row-reverse">
                                 <span class="text-xs font-bold text-white/50" id="p1-sets">0 מערכות</span>
-                                <span id="p1-prediction" class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
-                             </div>
+                                <span id="p1-prediction"
+                                    class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
+                            </div>
                         </div>
                         <!-- Score -->
                         <div class="flex flex-col items-center flex-1">
@@ -205,23 +308,29 @@
                                 <span class="text-white/30 text-xl">-</span>
                                 <span class="text-white" id="p2-score">0</span>
                             </div>
-                            <span class="text-xs text-white/50 mt-1"><span id="match-set">Set 1</span> • <span id="match-timer">08:30</span></span>
+                            <span class="text-xs text-white/50 mt-1"><span id="match-set">Set 1</span> • <span
+                                    id="match-timer">08:30</span></span>
                         </div>
                         <!-- Player 2 -->
                         <div class="flex flex-col items-center flex-1">
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 to-primary p-1 mb-2 shadow-lg">
-                                <img id="p2-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Player 2" class="w-full h-full rounded-full bg-white">
+                            <div
+                                class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 to-primary p-1 mb-2 shadow-lg">
+                                <img id="p2-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                                    alt="Player 2" class="w-full h-full rounded-full bg-white">
                             </div>
                             <span class="font-semibold text-sm" id="p2-name">Jane S.</span>
-                             <div class="flex items-center gap-1.5 mt-1 flex-row-reverse">
+                            <div class="flex items-center gap-1.5 mt-1 flex-row-reverse">
                                 <span class="text-xs font-bold text-white/50" id="p2-sets">0 מערכות</span>
-                                <span id="p2-prediction" class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
-                             </div>
+                                <span id="p2-prediction"
+                                    class="text-[10px] font-black text-white bg-primary px-2 py-0.5 rounded-full shadow-lg shadow-primary/20 hidden animate-pulse">0%</span>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-5 w-full bg-white/10 rounded-full h-1.5 overflow-hidden flex">
-                        <div id="p1-prediction-bar" class="bg-primary h-full transition-all duration-700 ease-out" style="width: 50%"></div>
-                        <div id="p2-prediction-bar" class="bg-white/20 h-full transition-all duration-700 ease-out" style="width: 50%"></div>
+                        <div id="p1-prediction-bar" class="bg-primary h-full transition-all duration-700 ease-out"
+                            style="width: 50%"></div>
+                        <div id="p2-prediction-bar" class="bg-white/20 h-full transition-all duration-700 ease-out"
+                            style="width: 50%"></div>
                     </div>
                 </div>
             </section>
@@ -251,65 +360,89 @@
         <!-- GROUPS VIEW -->
         <div id="view-groups" class="view-section hidden space-y-6 pb-6">
             <h2 class="text-xl font-bold mb-4">שלבי הטורניר</h2>
-            
+
             <!-- Tournament Phases Navigation -->
-            <div id="phase-tabs-container" class="flex items-center overflow-x-auto py-4 mb-6 no-scrollbar snap-x snap-mandatory border-b border-white/10 sticky top-0 bg-dark/80 backdrop-blur-md z-10 scroll-smooth px-2">
-                <button onclick="window.scrollToSlide('groups')" id="btn-phase-groups" class="phase-btn active shrink-0 snap-center flex flex-col items-center gap-1">
+            <div id="phase-tabs-container"
+                class="flex items-center overflow-x-auto py-4 mb-6 no-scrollbar snap-x snap-mandatory border-b border-white/10 sticky top-0 bg-dark/80 backdrop-blur-md z-10 scroll-smooth px-2">
+                <button onclick="window.scrollToSlide('groups')" id="btn-phase-groups"
+                    class="phase-btn active shrink-0 snap-center flex flex-col items-center gap-1">
                     <div class="w-2 h-2 rounded-full bg-current mb-1"></div>
                     בתים
                 </button>
-                
-                <div class="shrink-0 flex items-center px-1 text-white/20"><div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i class="fa-solid fa-chevron-left text-[10px] ml-1"></i></div>
-                
-                <button onclick="window.scrollToSlide('round16')" id="btn-phase-round16" class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
+
+                <div class="shrink-0 flex items-center px-1 text-white/20">
+                    <div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i
+                        class="fa-solid fa-chevron-left text-[10px] ml-1"></i>
+                </div>
+
+                <button onclick="window.scrollToSlide('round16')" id="btn-phase-round16"
+                    class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
                     <div class="w-2 h-2 rounded-full bg-current mb-1"></div>
                     שמינית גמר
                 </button>
 
-                <div class="shrink-0 flex items-center px-1 text-white/20"><div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i class="fa-solid fa-chevron-left text-[10px] ml-1"></i></div>
-                
-                <button onclick="window.scrollToSlide('quarters')" id="btn-phase-quarters" class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
+                <div class="shrink-0 flex items-center px-1 text-white/20">
+                    <div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i
+                        class="fa-solid fa-chevron-left text-[10px] ml-1"></i>
+                </div>
+
+                <button onclick="window.scrollToSlide('quarters')" id="btn-phase-quarters"
+                    class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
                     <div class="w-2 h-2 rounded-full bg-current mb-1"></div>
                     רבע גמר
                 </button>
 
-                <div class="shrink-0 flex items-center px-1 text-white/20"><div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i class="fa-solid fa-chevron-left text-[10px] ml-1"></i></div>
-                
-                <button onclick="window.scrollToSlide('semis')" id="btn-phase-semis" class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
+                <div class="shrink-0 flex items-center px-1 text-white/20">
+                    <div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i
+                        class="fa-solid fa-chevron-left text-[10px] ml-1"></i>
+                </div>
+
+                <button onclick="window.scrollToSlide('semis')" id="btn-phase-semis"
+                    class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
                     <div class="w-2 h-2 rounded-full bg-current mb-1"></div>
                     חצי גמר
                 </button>
 
-                <div class="shrink-0 flex items-center px-1 text-white/20"><div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i class="fa-solid fa-chevron-left text-[10px] ml-1"></i></div>
-                
-                <button onclick="window.scrollToSlide('final')" id="btn-phase-final" class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
+                <div class="shrink-0 flex items-center px-1 text-white/20">
+                    <div class="h-[2px] w-3 bg-white/20 rounded-full"></div><i
+                        class="fa-solid fa-chevron-left text-[10px] ml-1"></i>
+                </div>
+
+                <button onclick="window.scrollToSlide('final')" id="btn-phase-final"
+                    class="phase-btn shrink-0 snap-center flex flex-col items-center gap-1">
                     <div class="w-2 h-2 rounded-full bg-current mb-1"></div>
                     גמר
                 </button>
             </div>
 
             <!-- Slides Container (Bracket Canvas) -->
-            <div id="tournament-slider" class="overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth relative">
+            <div id="tournament-slider"
+                class="overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth relative">
                 <div id="bracket-canvas" class="flex items-start relative pb-20">
-                    
+
                     <!-- Group Stage Content -->
-                    <div id="slide-groups" class="w-full shrink-0 snap-center px-2 snap-slide" style="scroll-snap-stop: always;">
+                    <div id="slide-groups" class="w-full shrink-0 snap-center px-2 snap-slide"
+                        style="scroll-snap-stop: always;">
                         <div id="groups-container" class="space-y-4 py-2">
                             <!-- Tables populated by JS -->
                         </div>
                     </div>
 
                     <!-- Knockout Phases -->
-                    <div id="slide-round16" class="w-full shrink-0 snap-center px-2 snap-slide" style="scroll-snap-stop: always;">
+                    <div id="slide-round16" class="w-full shrink-0 snap-center px-2 snap-slide"
+                        style="scroll-snap-stop: always;">
                         <div id="round16-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-quarters" class="w-full shrink-0 snap-center px-2 snap-slide" style="scroll-snap-stop: always;">
+                    <div id="slide-quarters" class="w-full shrink-0 snap-center px-2 snap-slide"
+                        style="scroll-snap-stop: always;">
                         <div id="quarters-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-semis" class="w-full shrink-0 snap-center px-2 snap-slide" style="scroll-snap-stop: always;">
+                    <div id="slide-semis" class="w-full shrink-0 snap-center px-2 snap-slide"
+                        style="scroll-snap-stop: always;">
                         <div id="semis-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
-                    <div id="slide-final" class="w-full shrink-0 snap-center px-2 snap-slide" style="scroll-snap-stop: always;">
+                    <div id="slide-final" class="w-full shrink-0 snap-center px-2 snap-slide"
+                        style="scroll-snap-stop: always;">
                         <div id="final-container" class="flex flex-col justify-start py-4 space-y-6"></div>
                     </div>
                 </div>
@@ -338,11 +471,12 @@
     </main>
 
     <!-- Player Profile Modal Overlay -->
-    <div id="player-modal" class="fixed inset-0 z-[60] bg-dark/90 backdrop-blur-md translate-y-full transition-transform duration-300 flex flex-col justify-end">
+    <div id="player-modal"
+        class="fixed inset-0 z-[60] bg-dark/90 backdrop-blur-md translate-y-full transition-transform duration-300 flex flex-col justify-end">
         <div class="flex-1" onclick="closePlayerModal()"></div> <!-- Click outside to close -->
         <div class="glass-panel rounded-t-3xl border-t border-white/20 p-6 flex flex-col max-h-[85vh]">
             <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6"></div>
-            
+
             <div class="flex items-center gap-4 mb-6">
                 <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-1 shadow-lg">
                     <img id="modal-img" src="" alt="Player" class="w-full h-full rounded-full bg-white object-cover">
@@ -351,7 +485,8 @@
                     <h2 id="modal-name" class="text-2xl font-bold">Player Name</h2>
                     <div id="modal-rank" class="text-primary font-medium flex items-center gap-1.5"></div>
                 </div>
-                <button onclick="closePlayerModal()" class="ml-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-white/20">
+                <button onclick="closePlayerModal()"
+                    class="ml-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-white/20">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -376,7 +511,9 @@
                 <!-- Form tags populated by JS -->
             </div>
 
-            <button class="w-full py-4 glass-panel border border-primary/50 text-primary font-bold rounded-xl active:scale-95 transition-transform" onclick="closePlayerModal()">
+            <button
+                class="w-full py-4 glass-panel border border-primary/50 text-primary font-bold rounded-xl active:scale-95 transition-transform"
+                onclick="closePlayerModal()">
                 Close Profile
             </button>
         </div>
@@ -385,23 +522,28 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/10 pb-safe">
         <div class="flex justify-around items-center h-16 max-w-md mx-auto">
-            <button onclick="switchView('home')" id="nav-home" class="nav-btn flex flex-col items-center justify-center w-full h-full text-primary transition-colors">
+            <button onclick="switchView('home')" id="nav-home"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-primary transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium mt-1">בית</span>
             </button>
-            <button onclick="switchView('results')" id="nav-results" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+            <button onclick="switchView('results')" id="nav-results"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
                 <i class="fa-solid fa-check-double text-xl mb-1"></i>
                 <span class="text-[10px] font-medium mt-1">תוצאות</span>
             </button>
-            <button onclick="switchView('groups')" id="nav-groups" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+            <button onclick="switchView('groups')" id="nav-groups"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
                 <i class="fa-solid fa-table text-xl mb-1"></i>
                 <span class="text-[10px] font-medium mt-1">בתים</span>
             </button>
-            <button onclick="switchView('players')" id="nav-players" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+            <button onclick="switchView('players')" id="nav-players"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
                 <i class="fa-solid fa-user text-xl mb-1"></i>
                 <span class="text-[10px] font-medium mt-1">שחקנים</span>
             </button>
-            <button onclick="switchView('news')" id="nav-news" class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
+            <button onclick="switchView('news')" id="nav-news"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-white/50 hover:text-white transition-colors">
                 <i class="fa-solid fa-newspaper text-xl mb-1"></i>
                 <span class="text-[10px] font-medium mt-1">חדשות</span>
             </button>
@@ -415,4 +557,5 @@
     <script src="firebase-config.js"></script>
     <script src="app.js?v=3"></script>
 </body>
+
 </html>
