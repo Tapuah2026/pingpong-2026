@@ -99,7 +99,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
 </head>
-<body class="min-h-screen flex flex-col bg-dark">
+<body class="min-h-screen flex flex-col bg-dark overflow-hidden">
     <!-- Splash Screen Loader -->
     <div id="loader-wrapper">
         <div class="gate gate-left"></div>
@@ -324,7 +324,7 @@
     </div>
 
     <!-- PIN Overlay (Mock) -->
-    <div id="pin-overlay" class="absolute inset-0 z-50 bg-dark/95 flex flex-col items-center justify-center p-6 backdrop-blur-md transition-opacity duration-300">
+    <div id="pin-overlay" class="fixed inset-0 z-[100] bg-dark/95 flex flex-col items-center justify-center p-6 backdrop-blur-md transition-opacity duration-300">
         <i class="fa-solid fa-lock text-4xl text-white/50 mb-4"></i>
         <h2 class="text-xl font-bold mb-1">כניסת מנהל</h2>
         <p class="text-white/50 text-sm mb-6">הזן קוד גישה כדי להמשיך</p>
@@ -395,6 +395,7 @@
         window.checkPin = function() {
             const pin = document.getElementById('pin-input').value;
             if (pin === '1234') {
+                document.body.classList.remove('overflow-hidden');
                 document.getElementById('pin-overlay').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('pin-overlay').style.display = 'none';
