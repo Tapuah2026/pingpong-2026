@@ -935,12 +935,35 @@ function initNewsListener() {
     });
 }
 
+// Analytics: Track visits per day
+function trackVisit() {
+    if (!window.db) return;
+    try {
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        
+        // Use sessionStorage to avoid double-counting refreshes in the same session
+        const visitKey = `visited_${dateStr}`;
+        if (sessionStorage.getItem(visitKey)) return;
+
+        const visitsRef = window.db.ref(`analytics/visits/${dateStr}`);
+        visitsRef.transaction((currentValue) => {
+            return (currentValue || 0) + 1;
+        });
+        
+        sessionStorage.setItem(visitKey, 'true');
+    } catch (e) {
+        console.error("Visit tracking error:", e);
+    }
+}
+
 // Initialize all global listeners
 function initAllListeners() {
     initAppListeners();
     initCompletedMatchesListener();
     initTournamentStateListener();
     initNewsListener();
+    trackVisit(); // Track visit on load
 }
 
 // --- Page Load Handling ---
