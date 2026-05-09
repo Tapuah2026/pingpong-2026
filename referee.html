@@ -482,17 +482,6 @@
                     }
                 }
                 
-                const now = new Date();
-                const currentHours = now.getHours().toString().padStart(2, '0');
-                const currentMinutes = now.getMinutes().toString().padStart(2, '0');
-                const currentTimeString = `${currentHours}:${currentMinutes}`;
-                
-                if (liveP1 === '---' || !liveP1) {
-                    const dueMatch = upcoming.find(m => currentTimeString >= m.time);
-                    if (dueMatch) {
-                        window.startUpcomingMatch(dueMatch.firebaseKey, true);
-                    }
-                }
             });
         }
 
