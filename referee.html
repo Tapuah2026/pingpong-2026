@@ -1114,7 +1114,6 @@
             if (!window.db || typeof players === 'undefined' || typeof groupNames === 'undefined') return;
 
             const upcomingRef = window.db.ref('upcomingMatches');
-            const now = new Date().toISOString().split('T')[0];
             
             groupNames.forEach(groupName => {
                 const groupPlayers = players.filter(p => p.group === groupName);
@@ -1128,8 +1127,6 @@
                         upcomingRef.push({
                             p1: p1,
                             p2: p2,
-                            date: now,
-                            time: "10:00",
                             status: 'scheduled'
                         });
                     }
