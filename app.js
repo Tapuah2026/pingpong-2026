@@ -667,11 +667,18 @@ function initAppListeners() {
             }
             if (p1Bar) p1Bar.style.width = `${p1Percent}%`;
             if (p2Bar) p2Bar.style.width = `${p2Percent}%`;
+            const totalEl = document.getElementById('total-predictions');
+            if (totalEl) {
+                totalEl.innerText = `${total} הצבעות`;
+                totalEl.classList.remove('hidden');
+            }
         } else {
             if (p1Pred) p1Pred.classList.add('hidden');
             if (p2Pred) p2Pred.classList.add('hidden');
             if (p1Bar) p1Bar.style.width = `50%`;
             if (p2Bar) p2Bar.style.width = `50%`;
+            const totalEl = document.getElementById('total-predictions');
+            if (totalEl) totalEl.classList.add('hidden');
         }
     });
 
@@ -739,9 +746,12 @@ function updateUpcomingUI(data) {
                 ${hasVoted ? `
                 <div class="flex items-center gap-3 animate-slide-down">
                     <div class="w-16 pr-2"></div>
-                    <div class="flex-1 h-1 bg-white/5 rounded-full overflow-hidden flex">
-                        <div class="bg-primary h-full transition-all duration-700 ease-out" style="width: ${p1Percent}%"></div>
-                        <div class="bg-white/10 h-full transition-all duration-700 ease-out" style="width: ${p2Percent}%"></div>
+                    <div class="flex-1">
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden flex mb-1">
+                            <div class="bg-primary h-full transition-all duration-700 ease-out" style="width: ${p1Percent}%"></div>
+                            <div class="bg-white/10 h-full transition-all duration-700 ease-out" style="width: ${p2Percent}%"></div>
+                        </div>
+                        <div class="text-[9px] text-white/20 text-center font-bold">${totalVotes} הצבעות</div>
                     </div>
                 </div>
                 ` : `
