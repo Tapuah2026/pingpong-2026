@@ -766,7 +766,7 @@ function updateUpcomingUI(data) {
                             <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-all active:scale-95 group">
                                 <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p1 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p1 ? 'text-primary' : 'text-white/70'}">${m.p1.split(' ')[0]}</span>
+                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p1 ? 'text-primary' : 'text-white/70'}">${m.p1}</span>
                                     ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p1Percent}%</span>` : ''}
                                 </div>
                             </div>
@@ -777,7 +777,7 @@ function updateUpcomingUI(data) {
                             <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-all active:scale-95 group">
                                 <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p2 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
                                 <div class="flex flex-col items-end">
-                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p2 ? 'text-primary' : 'text-white/70'}">${m.p2.split(' ')[0]}</span>
+                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p2 ? 'text-primary' : 'text-white/70'}">${m.p2}</span>
                                     ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p2Percent}%</span>` : ''}
                                 </div>
                             </div>
