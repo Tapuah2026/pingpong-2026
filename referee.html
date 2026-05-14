@@ -384,6 +384,13 @@
             </div>
 
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                <h3 class="font-bold mb-2 text-green-400">תזמון אוטומטי</h3>
+                <p class="text-xs text-white/50 mb-4">יצירת כל המשחקים האפשריים בכל הבתים (סבב מלא) והוספתם לתור.</p>
+                <button onclick="window.generateGroupMatches()"
+                    class="w-full bg-green-500 py-3 rounded-xl font-bold text-sm">צור את כל משחקי הבתים</button>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl border border-white/10">
                 <h3 class="font-bold mb-2">מחיקת כל הנתונים</h3>
                 <p class="text-xs text-white/50 mb-4">פעולה זו תמחק את כל המשחקים, החדשות והתוצאות. אין דרך חזרה!</p>
                 <button onclick="window.resetTournament()"
@@ -1100,6 +1107,37 @@
                 window.closeSchedule();
                 alert(`המשחק בין ${p1} ל-${p2} התחיל בשידור חי!`);
             });
+        };
+
+        window.generateGroupMatches = function() {
+            if (!confirm("פעולה זו תיצור את כל המשחקים בכל הבתים ותוסיף אותם לרשימת ההמתנה. להמשיך?")) return;
+            if (!window.db || typeof players === 'undefined' || typeof groupNames === 'undefined') return;
+
+            const upcomingRef = window.db.ref('upcomingMatches');
+            const now = new Date().toISOString().split('T')[0];
+            
+            groupNames.forEach(groupName => {
+                const groupPlayers = players.filter(p => p.group === groupName);
+                
+                // Generate all unique pairings
+                for (let i = 0; i < groupPlayers.length; i++) {
+                    for (let j = i + 1; j < groupPlayers.length; j++) {
+                        const p1 = groupPlayers[i].name;
+                        const p2 = groupPlayers[j].name;
+                        
+                        upcomingRef.push({
+                            p1: p1,
+                            p2: p2,
+                            date: now,
+                            time: "10:00",
+                            status: 'scheduled'
+                        });
+                    }
+                }
+            });
+            
+            alert("כל משחקי הבתים נוצרו בהצלחה!");
+            document.getElementById('mgmt-overlay').classList.add('translate-y-full');
         };
 
         window.closePhase = function (phase) {
