@@ -698,71 +698,117 @@ function updateUpcomingUI(data) {
     }
 
     const entries = Object.entries(data);
-    container.innerHTML = entries.map(([matchId, m]) => {
-        const p1Img = getPlayerAvatar(m.p1);
-        const p2Img = getPlayerAvatar(m.p2);
-
-        const matchPredictions = predictions[matchId] || {};
-        const totalVotes = Object.keys(matchPredictions).length;
-        const p1Votes = Object.values(matchPredictions).filter(v => v === m.p1).length;
-        const p2Votes = Object.values(matchPredictions).filter(v => v === m.p2).length;
+    
+    // Grouping by House (בית)
+    const grouped = {};
+    entries.forEach(([id, m]) => {
+        const p1Info = players.find(p => p.name === m.p1);
+        const p2Info = players.find(p => p.name === m.p2);
         
-        const userPrediction = matchPredictions[userId];
-        const hasVoted = !!userPrediction;
+        let groupName = "אחר"; // Default for knockout or mixed
+        if (p1Info && p2Info && p1Info.group === p2Info.group) {
+            groupName = p1Info.group;
+        } else if (p1Info) {
+            groupName = p1Info.group;
+        } else if (p2Info) {
+            groupName = p2Info.group;
+        }
+        
+        if (!grouped[groupName]) grouped[groupName] = [];
+        grouped[groupName].push({ id, ...m });
+    });
 
-        const p1Percent = totalVotes > 0 ? Math.round((p1Votes / totalVotes) * 100) : 0;
-        const p2Percent = totalVotes > 0 ? Math.round((p2Votes / totalVotes) * 100) : 0;
+    // Sort groups so named groups come first, "Other" last
+    const sortedGroupNames = Object.keys(grouped).sort((a, b) => {
+        if (a === "אחר") return 1;
+        if (b === "אחר") return -1;
+        return a.localeCompare(b);
+    });
 
-        return `
-            <div class="glass-panel p-3 rounded-xl flex flex-col gap-3 animate-fade-in-up overflow-hidden relative">
-                <div class="flex items-center gap-3">
-                    <div class="text-center w-16 border-r border-white/10 pr-2">
-                        <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'TBD'}</div>
-                        <div class="font-bold text-primary">${m.time || '--:--'}</div>
-                    </div>
-                    <div class="flex-1 flex items-center justify-between pl-2">
-                        <!-- Player 1 -->
-                        <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-all active:scale-95 group">
-                            <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p1 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold transition-colors ${userPrediction === m.p1 ? 'text-primary' : 'text-white/70'}">${m.p1}</span>
-                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30 animate-slide-down">${p1Percent}%</span>` : ''}
-                            </div>
-                        </div>
-                        
-                        <span class="text-white/20 text-[10px] font-black uppercase tracking-tighter">VS</span>
-                        
-                        <!-- Player 2 -->
-                        <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-all active:scale-95 group">
-                            <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p2 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
-                            <div class="flex flex-col items-end">
-                                <span class="text-sm font-semibold transition-colors ${userPrediction === m.p2 ? 'text-primary' : 'text-white/70'}">${m.p2}</span>
-                                ${hasVoted ? `<span class="text-[10px] font-bold text-white/30 animate-slide-down">${p2Percent}%</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
+    let finalHtml = '';
+    
+    sortedGroupNames.forEach(groupName => {
+        finalHtml += `
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/10"></div>
+                    <span class="text-[10px] font-black text-primary uppercase tracking-[0.2em] whitespace-nowrap">בית ${groupName}</span>
+                    <div class="h-px flex-1 bg-gradient-to-l from-transparent to-white/10"></div>
                 </div>
-                
-                ${hasVoted ? `
-                <div class="flex items-center gap-3 animate-slide-down">
-                    <div class="w-16 pr-2"></div>
-                    <div class="flex-1">
-                        <div class="h-1 bg-white/5 rounded-full overflow-hidden flex mb-1">
-                            <div class="bg-primary h-full transition-all duration-700 ease-out" style="width: ${p1Percent}%"></div>
-                            <div class="bg-white/10 h-full transition-all duration-700 ease-out" style="width: ${p2Percent}%"></div>
-                        </div>
-                        <div class="text-[9px] text-white/20 text-center font-bold">${totalVotes} הצבעות</div>
-                    </div>
-                </div>
-                ` : `
-                <div class="flex items-center gap-3">
-                    <div class="w-16 pr-2"></div>
-                    <div class="flex-1 text-[9px] text-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
-                </div>
-                `}
-            </div>
+                <div class="space-y-3">
         `;
-    }).join('');
+        
+        grouped[groupName].forEach(m => {
+            const matchId = m.id;
+            const p1Img = getPlayerAvatar(m.p1);
+            const p2Img = getPlayerAvatar(m.p2);
+
+            const matchPredictions = predictions[matchId] || {};
+            const totalVotes = Object.keys(matchPredictions).length;
+            const p1Votes = Object.values(matchPredictions).filter(v => v === m.p1).length;
+            const p2Votes = Object.values(matchPredictions).filter(v => v === m.p2).length;
+            
+            const userPrediction = matchPredictions[userId];
+            const hasVoted = !!userPrediction;
+
+            const p1Percent = totalVotes > 0 ? Math.round((p1Votes / totalVotes) * 100) : 0;
+            const p2Percent = totalVotes > 0 ? Math.round((p2Votes / totalVotes) * 100) : 0;
+
+            finalHtml += `
+                <div class="glass-panel p-3 rounded-xl flex flex-col gap-3 animate-fade-in-up overflow-hidden relative shadow-lg shadow-black/10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-center w-16 border-r border-white/10 pr-2">
+                            <div class="text-[9px] text-white/40 uppercase font-bold">${m.date ? m.date.split('-').slice(1).reverse().join('/') : 'TBD'}</div>
+                            <div class="font-bold text-primary">${m.time || '--:--'}</div>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between pl-2">
+                            <!-- Player 1 -->
+                            <div onclick="window.submitPrediction('${matchId}', '${m.p1}')" class="flex items-center gap-2 cursor-pointer transition-all active:scale-95 group">
+                                <img src="${p1Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p1 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p1 ? 'text-primary' : 'text-white/70'}">${m.p1.split(' ')[0]}</span>
+                                    ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p1Percent}%</span>` : ''}
+                                </div>
+                            </div>
+                            
+                            <span class="text-white/20 text-[10px] font-black uppercase tracking-tighter">VS</span>
+                            
+                            <!-- Player 2 -->
+                            <div onclick="window.submitPrediction('${matchId}', '${m.p2}')" class="flex items-center gap-2 flex-row-reverse cursor-pointer transition-all active:scale-95 group">
+                                <img src="${p2Img}" class="w-8 h-8 rounded-full bg-white/10 transition-all duration-300 border-2 border-transparent ${userPrediction === m.p2 ? 'active-ring-glow scale-110' : 'grayscale-[0.5] group-hover:grayscale-0'}">
+                                <div class="flex flex-col items-end">
+                                    <span class="text-sm font-semibold transition-colors ${userPrediction === m.p2 ? 'text-primary' : 'text-white/70'}">${m.p2.split(' ')[0]}</span>
+                                    ${hasVoted ? `<span class="text-[10px] font-bold text-white/30">${p2Percent}%</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${hasVoted ? `
+                    <div class="flex items-center gap-3 animate-slide-down">
+                        <div class="w-16 pr-2"></div>
+                        <div class="flex-1">
+                            <div class="h-1 bg-white/5 rounded-full overflow-hidden flex mb-1">
+                                <div class="bg-primary h-full transition-all duration-700 ease-out" style="width: ${p1Percent}%"></div>
+                                <div class="bg-white/10 h-full transition-all duration-700 ease-out" style="width: ${p2Percent}%"></div>
+                            </div>
+                            <div class="text-[9px] text-white/20 text-center font-bold">${totalVotes} הצבעות</div>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="flex items-center gap-3">
+                        <div class="w-16 pr-2"></div>
+                        <div class="flex-1 text-[9px] text-center text-white/20 uppercase font-bold tracking-widest">לחץ על שחקן כדי להמר</div>
+                    </div>
+                    `}
+                </div>
+            `;
+        });
+        
+        finalHtml += `</div></div>`;
+    });
+
+    container.innerHTML = finalHtml;
 }
 
 window.submitPrediction = function(matchId, playerName) {
