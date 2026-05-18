@@ -463,40 +463,26 @@ function renderBracket(phase) {
     
     if (phase === 'round16' && isGroupsClosed) {
         const groupStandings = {};
-        const allThirdPlaces = [];
 
         groupNames.forEach(gn => {
             const gPlayers = calculatedPlayers.filter(p => p.group === gn);
             gPlayers.sort((a, b) => b.points - a.points || b.wins - a.wins);
             groupStandings[gn] = gPlayers;
-            
-            if (gPlayers.length >= 3) {
-                allThirdPlaces.push(gPlayers[2]); // 3rd place is index 2
-            }
         });
-
-        // Sort third places to find the best two
-        allThirdPlaces.sort((a, b) => b.points - a.points || b.wins - a.wins);
-        const bestThirds = allThirdPlaces.slice(0, 2);
 
         const pairings = [
             { m: 1, s: 1, g: 'לובאן', r: 0 }, { m: 1, s: 2, g: 'עלי', r: 1 },
-            { m: 2, s: 1, g: 'השב\"ח', r: 0 }, { m: 2, s: 2, g: 'תורמוס', r: 1 },
-            { m: 3, s: 1, g: 'הלוזר', r: 0 }, { m: 3, s: 2, g: 'הדורבן', r: 1 },
-            { m: 4, s: 1, g: 'ששון', r: 0 }, { m: 4, s: 2, type: 'bestThird', idx: 0 },
+            { m: 2, s: 1, g: 'השבח', r: 0 }, { m: 2, s: 2, g: 'המיליונר', r: 1 },
+            { m: 3, s: 1, g: 'תורמוס', r: 0 }, { m: 3, s: 2, g: 'ששון', r: 1 },
+            { m: 4, s: 1, g: 'הלוזר', r: 0 }, { m: 4, s: 2, g: 'הדורבן', r: 1 },
             { m: 5, s: 1, g: 'עלי', r: 0 }, { m: 5, s: 2, g: 'לובאן', r: 1 },
-            { m: 6, s: 1, g: 'תורמוס', r: 0 }, { m: 6, s: 2, g: 'השב\"ח', r: 1 },
-            { m: 7, s: 1, g: 'הדורבן', r: 0 }, { m: 7, s: 2, g: 'הלוזר', r: 1 },
-            { m: 8, s: 1, type: 'bestThird', idx: 1 }, { m: 8, s: 2, g: 'ששון', r: 1 }
+            { m: 6, s: 1, g: 'המיליונר', r: 0 }, { m: 6, s: 2, g: 'השבח', r: 1 },
+            { m: 7, s: 1, g: 'ששון', r: 0 }, { m: 7, s: 2, g: 'תורמוס', r: 1 },
+            { m: 8, s: 1, g: 'הדורבן', r: 0 }, { m: 8, s: 2, g: 'הלוזר', r: 1 }
         ];
 
         pairings.forEach(p => {
-            let player;
-            if (p.type === 'bestThird') {
-                player = bestThirds[p.idx];
-            } else {
-                player = groupStandings[p.g] && groupStandings[p.g][p.r];
-            }
+            const player = groupStandings[p.g] && groupStandings[p.g][p.r];
             if (player) bracketData[`${p.m}-${p.s}`] = player;
         });
     } else if (phase === 'quarters' && window.closedPhases?.round16) {
