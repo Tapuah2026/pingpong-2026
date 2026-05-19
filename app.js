@@ -193,11 +193,11 @@ function renderPlayers() {
 
         list.innerHTML += `
             <div class="glass-panel rounded-2xl p-3 flex items-center justify-between animate-fade-in-up">
-                <div class="flex items-center gap-3 flex-1" onclick="window.openPlayerModal(${p.id})">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-0.5">
-                        <img src="${getPlayerAvatar(p.name)}" class="w-full h-full rounded-full bg-white">
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-white/10 to-white/30 p-0.5" onclick="event.stopPropagation(); window.openImageViewer('${getPlayerAvatar(p.name)}')">
+                        <img src="${getPlayerAvatar(p.name)}" class="w-full h-full rounded-full bg-white cursor-pointer hover:scale-110 transition-transform">
                     </div>
-                    <div class="flex flex-col">
+                    <div class="flex flex-col cursor-pointer" onclick="window.openPlayerModal(${p.id})">
                         <h3 class="font-bold text-sm text-white">${p.name}</h3>
                         <span class="text-[10px] text-primary font-medium">בית ${p.group} • #${p.rank || '-'}</span>
                     </div>
@@ -848,7 +848,7 @@ function initCompletedMatchesListener() {
                 <div class="text-xs text-white/50 text-center uppercase tracking-widest">${match.date}</div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 w-1/3">
-                        <img src="${p1Img}" class="w-10 h-10 rounded-full bg-white/10 p-0.5 ${isP1Winner ? 'ring-2 ring-primary' : ''}">
+                        <img src="${p1Img}" onclick="window.openImageViewer('${p1Img}')" class="w-10 h-10 rounded-full bg-white/10 p-0.5 cursor-pointer hover:scale-110 transition-transform ${isP1Winner ? 'ring-2 ring-primary' : ''}">
                         <span class="font-bold text-sm ${isP1Winner ? 'text-primary' : 'text-white/70'}">${match.p1.split(' ')[0]}</span>
                     </div>
                     <div class="flex items-center gap-2 font-mono text-xl w-1/3 justify-center">
@@ -858,7 +858,7 @@ function initCompletedMatchesListener() {
                     </div>
                     <div class="flex items-center gap-3 w-1/3 justify-end">
                         <span class="font-bold text-sm ${!isP1Winner ? 'text-primary' : 'text-white/70'}">${match.p2.split(' ')[0]}</span>
-                        <img src="${p2Img}" class="w-10 h-10 rounded-full bg-white/10 p-0.5 ${!isP1Winner ? 'ring-2 ring-primary' : ''}">
+                        <img src="${p2Img}" onclick="window.openImageViewer('${p2Img}')" class="w-10 h-10 rounded-full bg-white/10 p-0.5 cursor-pointer hover:scale-110 transition-transform ${!isP1Winner ? 'ring-2 ring-primary' : ''}">
                     </div>
                 </div>
 
@@ -1033,4 +1033,31 @@ renderBracket('quarters');
 renderBracket('semis');
 renderBracket('final');
 
+// --- Image Viewer Logic ---
+window.openImageViewer = function(src) {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    if (!modal || !img) return;
 
+    img.src = src;
+    modal.classList.remove('pointer-events-none');
+    modal.classList.remove('opacity-0');
+    setTimeout(() => {
+        img.classList.remove('scale-95');
+        img.classList.add('scale-100');
+    }, 10);
+};
+
+window.closeImageViewer = function() {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    if (!modal || !img) return;
+
+    img.classList.remove('scale-100');
+    img.classList.add('scale-95');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('pointer-events-none');
+        img.src = '';
+    }, 300);
+};
