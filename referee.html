@@ -981,6 +981,8 @@
 
         window.startMatch = function (matchId, p1, p2) {
             if (!window.db) return;
+            
+            const streamUrl = prompt("הכנס קישור לשידור חי (השאר ריק אם אין):", "") || "";
 
             const liveData = {
                 p1, p2,
@@ -988,8 +990,9 @@
                 sets1: 0, sets2: 0,
                 currentSet: 1,
                 status: 'live',
-                matchId: matchId, // Add this
-                startTime: Date.now()
+                matchId: matchId,
+                startTime: Date.now(),
+                streamUrl: streamUrl
             };
 
             // 1. Move to Live Match in Firebase
@@ -1071,6 +1074,8 @@
             const p2 = document.getElementById('sched-p2').value;
 
             if (p1 === p2) return alert("בחר שחקנים שונים");
+            
+            const streamUrl = prompt("הכנס קישור לשידור חי (השאר ריק אם אין):", "") || "";
 
             const bracketPhase = document.getElementById('sched-bracket-phase').value;
             const bracketIndex = parseInt(document.getElementById('sched-bracket-index').value);
@@ -1083,7 +1088,8 @@
                 status: 'live',
                 startTime: Date.now(),
                 bracketPhase: bracketPhase || null,
-                bracketIndex: bracketIndex > 0 ? bracketIndex : null
+                bracketIndex: bracketIndex > 0 ? bracketIndex : null,
+                streamUrl: streamUrl
             };
 
             if (!window.db) return alert("שגיאה: מסד הנתונים לא מחובר!");

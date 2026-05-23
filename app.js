@@ -628,6 +628,18 @@ function initAppListeners() {
         if (p1Base) document.getElementById('p1-img').src = getPlayerAvatar(data.p1);
         if (p2Base) document.getElementById('p2-img').src = getPlayerAvatar(data.p2);
 
+        // Handle Live Stream Link
+        const streamLink = document.getElementById('live-stream-link');
+        if (streamLink) {
+            if (data.streamUrl && data.streamUrl.trim() !== '') {
+                streamLink.href = data.streamUrl;
+                streamLink.classList.remove('hidden');
+            } else {
+                streamLink.href = '#';
+                streamLink.classList.add('hidden');
+            }
+        }
+
         // Handle Predictions
         const p1Pred = document.getElementById('p1-prediction');
         const p2Pred = document.getElementById('p2-prediction');
