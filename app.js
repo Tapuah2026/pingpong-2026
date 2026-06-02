@@ -748,6 +748,29 @@ function initAppListeners() {
     });
 }
 
+function isRound16Match(p1, p2) {
+    if (!p1 || !p2) return false;
+    
+    // Normalize string: replace different Hebrew apostrophes, spaces, etc.
+    const clean = s => s.replace(/[\u05F3\u05F4'"`׳]/g, '').trim();
+    const c1 = clean(p1);
+    const c2 = clean(p2);
+    
+    const check = (n1, n2) => 
+        (c1.includes(n1) && c2.includes(n2)) || (c2.includes(n1) && c1.includes(n2));
+        
+    if (check('שמעון', 'גליקסמן')) return true;
+    if (check('דביר', 'שבח')) return true;
+    if (check('לובאן', 'אזול')) return true; // matches מנצח לובאן vs אזולאי / אזוליא
+    if (check('רזניק', 'לובטון')) return true;
+    if (check('בביקוב', 'פורטר')) return true;
+    if (check('יואב', 'שמואלי')) return true;
+    if (check('רותם', 'לובאן')) return true; // matches רותם vs מקום שני לובאן
+    if (check('יואש', 'צצקס')) return true; // matches יואש vs צ'צ'קס / צ׳צ׳קס
+    
+    return false;
+}
+
 function updateUpcomingUI(data) {
     const container = document.getElementById('home-upcoming-queue');
     if (!container) return;
@@ -759,29 +782,60 @@ function updateUpcomingUI(data) {
 
     const entries = Object.entries(data);
     
-    // Grouping by House (בית)
+    // Grouping by Header (בית or שלב)
     const grouped = {};
     entries.forEach(([id, m]) => {
-        const p1Info = players.find(p => p.name === m.p1);
-        const p2Info = players.find(p => p.name === m.p2);
+        let groupHeader = "משחקים אחרים";
         
-        let groupName = "אחר"; // Default for knockout or mixed
-        if (p1Info && p2Info && p1Info.group === p2Info.group) {
-            groupName = p1Info.group;
-        } else if (p1Info) {
-            groupName = p1Info.group;
-        } else if (p2Info) {
-            groupName = p2Info.group;
+        let phase = m.bracketPhase;
+        if (!phase && isRound16Match(m.p1, m.p2)) {
+            phase = 'round16';
         }
         
-        if (!grouped[groupName]) grouped[groupName] = [];
-        grouped[groupName].push({ id, ...m });
+        if (phase) {
+            const phaseNames = {
+                round16: 'שמינית הגמר',
+                quarters: 'רבע גמר',
+                semis: 'חצי גמר',
+                final: 'גמר'
+            };
+            groupHeader = phaseNames[phase] || phase;
+        } else {
+            const p1Info = players.find(p => p.name === m.p1);
+            const p2Info = players.find(p => p.name === m.p2);
+            
+            let groupName = "אחר";
+            if (p1Info && p2Info && p1Info.group === p2Info.group) {
+                groupName = p1Info.group;
+            } else if (p1Info) {
+                groupName = p1Info.group;
+            } else if (p2Info) {
+                groupName = p2Info.group;
+            }
+            
+            if (groupName !== "אחר") {
+                groupHeader = "בית " + groupName;
+            } else {
+                groupHeader = "משחקים אחרים";
+            }
+        }
+        
+        if (!grouped[groupHeader]) grouped[groupHeader] = [];
+        grouped[groupHeader].push({ id, ...m });
     });
 
-    // Sort groups so named groups come first, "Other" last
+    // Sort groups so bracket phases come first, then houses, then others
     const sortedGroupNames = Object.keys(grouped).sort((a, b) => {
-        if (a === "אחר") return 1;
-        if (b === "אחר") return -1;
+        if (a === "משחקים אחרים" || a === "אחר") return 1;
+        if (b === "משחקים אחרים" || b === "אחר") return -1;
+        
+        const phases = ['שמינית הגמר', 'רבע גמר', 'חצי גמר', 'גמר'];
+        const aIndex = phases.indexOf(a);
+        const bIndex = phases.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        
         return a.localeCompare(b);
     });
 
@@ -792,7 +846,7 @@ function updateUpcomingUI(data) {
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-4 px-1">
                     <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/10"></div>
-                    <span class="text-[10px] font-black text-primary uppercase tracking-[0.2em] whitespace-nowrap">בית ${groupName}</span>
+                    <span class="text-[10px] font-black text-primary uppercase tracking-[0.2em] whitespace-nowrap">${groupName}</span>
                     <div class="h-px flex-1 bg-gradient-to-l from-transparent to-white/10"></div>
                 </div>
                 <div class="space-y-3">

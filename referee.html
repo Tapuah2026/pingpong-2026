@@ -385,9 +385,13 @@
 
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
                 <h3 class="font-bold mb-2 text-green-400">תזמון אוטומטי</h3>
-                <p class="text-xs text-white/50 mb-4">יצירת כל המשחקים האפשריים בכל הבתים (סבב מלא) והוספתם לתור.</p>
-                <button onclick="window.generateGroupMatches()"
-                    class="w-full bg-green-500 py-3 rounded-xl font-bold text-sm">צור את כל משחקי הבתים</button>
+                <p class="text-xs text-white/50 mb-4">יצירת משחקי שלב הבתים או שלב שמינית הגמר והוספתם לתור.</p>
+                <div class="space-y-3">
+                    <button onclick="window.generateGroupMatches()"
+                        class="w-full bg-green-500 py-3 rounded-xl font-bold text-sm">צור את כל משחקי הבתים</button>
+                    <button onclick="window.generateRound16Matches()"
+                        class="w-full bg-blue-500 py-3 rounded-xl font-bold text-sm">צור את כל משחקי שמינית הגמר</button>
+                </div>
             </div>
 
             <div class="glass-panel p-4 rounded-2xl border border-white/10">
@@ -779,7 +783,9 @@
                     score1, score2, sets1, sets2, currentSet,
                     p1: match.p1,
                     p2: match.p2,
-                    matchId: firebaseKey
+                    matchId: firebaseKey,
+                    bracketPhase: match.bracketPhase || null,
+                    bracketIndex: match.bracketIndex || null
                 });
             });
         };
@@ -984,36 +990,42 @@
             
             const streamUrl = prompt("הכנס קישור לשידור חי (השאר ריק אם אין):", "") || "";
 
-            const liveData = {
-                p1, p2,
-                score1: 0, score2: 0,
-                sets1: 0, sets2: 0,
-                currentSet: 1,
-                status: 'live',
-                matchId: matchId,
-                startTime: Date.now(),
-                streamUrl: streamUrl
-            };
+            window.db.ref(`upcomingMatches/${matchId}`).once('value').then(snap => {
+                const match = snap.val() || {};
+                
+                const liveData = {
+                    p1, p2,
+                    score1: 0, score2: 0,
+                    sets1: 0, sets2: 0,
+                    currentSet: 1,
+                    status: 'live',
+                    matchId: matchId,
+                    startTime: Date.now(),
+                    streamUrl: streamUrl,
+                    bracketPhase: match.bracketPhase || null,
+                    bracketIndex: match.bracketIndex || null
+                };
 
-            // 1. Move to Live Match in Firebase
-            window.db.ref('liveMatch').set(liveData);
+                // 1. Move to Live Match in Firebase
+                window.db.ref('liveMatch').set(liveData).then(() => {
+                    // 2. Remove from Upcoming
+                    window.db.ref(`upcomingMatches/${matchId}`).remove();
 
-            // 2. Remove from Upcoming
-            window.db.ref(`upcomingMatches/${matchId}`).remove();
+                    // 3. Update Local UI Scoreboard
+                    document.getElementById('ref-p1-name').innerText = p1;
+                    document.getElementById('ref-p2-name').innerText = p2;
 
-            // 3. Update Local UI Scoreboard
-            document.getElementById('ref-p1-name').innerText = p1;
-            document.getElementById('ref-p2-name').innerText = p2;
+                    if (typeof score1 !== 'undefined') score1 = 0;
+                    if (typeof score2 !== 'undefined') score2 = 0;
+                    if (typeof sets1 !== 'undefined') sets1 = 0;
+                    if (typeof sets2 !== 'undefined') sets2 = 0;
+                    if (typeof currentSet !== 'undefined') currentSet = 1;
 
-            if (typeof score1 !== 'undefined') score1 = 0;
-            if (typeof score2 !== 'undefined') score2 = 0;
-            if (typeof sets1 !== 'undefined') sets1 = 0;
-            if (typeof sets2 !== 'undefined') sets2 = 0;
-            if (typeof currentSet !== 'undefined') currentSet = 1;
+                    if (typeof window.renderScoreboard === 'function') window.renderScoreboard();
 
-            if (typeof window.renderScoreboard === 'function') window.renderScoreboard();
-
-            alert(`המשחק בין ${p1} ל-${p2} התחיל!`);
+                    alert(`המשחק בין ${p1} ל-${p2} התחיל!`);
+                });
+            });
         };
 
         // Listen for Upcoming Matches
@@ -1140,6 +1152,38 @@
             });
             
             alert("כל משחקי הבתים נוצרו בהצלחה!");
+            document.getElementById('mgmt-overlay').classList.add('translate-y-full');
+        };
+
+        window.generateRound16Matches = function() {
+            if (!confirm("פעולה זו תיצור את כל 8 משחקי שמינית הגמר ותוסיף אותם לרשימת ההמתנה. להמשיך?")) return;
+            if (!window.db) return;
+
+            const upcomingRef = window.db.ref('upcomingMatches');
+
+            const matches = [
+                { p1: 'שמעון רוז', p2: 'עומר גליקסמן', index: 1 },
+                { p1: 'דביר שאול', p2: 'מקום שני שבח', index: 2 },
+                { p1: 'מנצח לובאן', p2: 'יניב אזוליא', index: 3 },
+                { p1: 'איתי רזניק', p2: 'אביב לובטון', index: 4 },
+                { p1: 'איליאן בביקוב', p2: 'כפיר פורטר', index: 5 },
+                { p1: 'יואב כרמל', p2: 'גל שמואלי', index: 6 },
+                { p1: 'רותם צור', p2: 'מקום שני לובאן', index: 7 },
+                { p1: 'יואש רון', p2: 'אורי צ\'צ\'קס', index: 8 }
+            ];
+
+            matches.forEach(m => {
+                upcomingRef.push({
+                    p1: m.p1,
+                    p2: m.p2,
+                    status: 'scheduled',
+                    timestamp: Date.now(),
+                    bracketPhase: 'round16',
+                    bracketIndex: m.index
+                });
+            });
+
+            alert("כל משחקי שמינית הגמר נוצרו בהצלחה!");
             document.getElementById('mgmt-overlay').classList.add('translate-y-full');
         };
 
