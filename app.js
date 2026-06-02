@@ -398,7 +398,7 @@ window.adjustSliderHeight = function (phaseId) {
     const canvas = document.getElementById('bracket-canvas');
     if (container && canvas) {
         setTimeout(() => {
-            canvas.style.height = `${container.offsetHeight + 120}px`;
+            canvas.style.height = `${container.scrollHeight + 150}px`;
         }, 50);
     }
 };
@@ -551,14 +551,14 @@ function renderBracket(phase) {
                 <div class="flex flex-col gap-1.5 flex-1 w-full">
                     <div class="flex justify-between items-center bg-white/5 ${innerPaddingClass} rounded-lg">
                         <div class="flex items-center ${gapClass} min-w-0">
-                            <img src="${getPlayerAvatar(p1.name)}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
+                            <img src="${getPlayerAvatar(p1.name)}" width="${isRound16 ? 24 : 32}" height="${isRound16 ? 24 : 32}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
                             <span class="${textSize} font-bold truncate ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold shrink-0">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 ${innerPaddingClass} rounded-lg">
                         <div class="flex items-center ${gapClass} min-w-0">
-                            <img src="${getPlayerAvatar(p2.name)}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
+                            <img src="${getPlayerAvatar(p2.name)}" width="${isRound16 ? 24 : 32}" height="${isRound16 ? 24 : 32}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
                             <span class="${textSize} font-bold truncate ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
                         <span class="font-mono text-primary text-xs font-bold shrink-0">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
