@@ -398,7 +398,7 @@ window.adjustSliderHeight = function (phaseId) {
     const canvas = document.getElementById('bracket-canvas');
     if (container && canvas) {
         setTimeout(() => {
-            canvas.style.height = `${container.offsetHeight + 40}px`;
+            canvas.style.height = `${container.offsetHeight + 120}px`;
         }, 50);
     }
 };
