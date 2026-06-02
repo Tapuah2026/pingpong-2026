@@ -110,6 +110,9 @@ function calculatePlayerStats(completedMatches) {
 }
 
 function getPlayerAvatar(playerName) {
+    if (!playerName || playerName === 'TBD' || playerName.includes('מקום') || playerName.includes('מנצח') || playerName.includes('Empty Spot')) {
+        return 'logo.png';
+    }
     const key = playerName.replace(/[.#$[\]]/g, '_');
     if (playerImages && playerImages[key]) {
         return playerImages[key];
@@ -173,6 +176,10 @@ function renderGroups() {
         container.innerHTML += groupHtml;
     });
     // renderGroups complete
+    const activeBtn = document.querySelector('.phase-btn.active');
+    if (activeBtn && activeBtn.id.replace('btn-phase-', '') === 'groups') {
+        if (typeof window.adjustSliderHeight === 'function') window.adjustSliderHeight('groups');
+    }
 }
 
 // --- Render Players ---
@@ -378,12 +385,31 @@ window.shareNews = function (title, text, customUrl) {
 };
 
 
+window.adjustSliderHeight = function (phaseId) {
+    if (!phaseId) {
+        const activeBtn = document.querySelector('.phase-btn.active');
+        if (activeBtn) {
+            phaseId = activeBtn.id.replace('btn-phase-', '');
+        } else {
+            phaseId = 'round16';
+        }
+    }
+    const container = document.getElementById(`${phaseId}-container`) || document.getElementById('groups-container');
+    const canvas = document.getElementById('bracket-canvas');
+    if (container && canvas) {
+        setTimeout(() => {
+            canvas.style.height = `${container.offsetHeight + 40}px`;
+        }, 50);
+    }
+};
+
 window.scrollToSlide = function (phaseId) {
     const slide = document.getElementById(`slide-${phaseId}`);
     if (slide) {
         slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         // Only scroll to top when user explicitly clicks a button
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.adjustSliderHeight(phaseId);
     }
 };
 
@@ -400,6 +426,7 @@ function initScrollSpy() {
                 document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.getElementById(`btn-phase-${phaseId}`);
                 if (activeBtn) activeBtn.classList.add('active');
+                window.adjustSliderHeight(phaseId);
             }
         });
     }, { root: slider, threshold: 0.9 });
@@ -423,9 +450,9 @@ window.switchView = function (viewId) {
         renderBracket('semis');
         renderBracket('final');
 
-        // Ensure we start at the first slide (Groups)
+        // Ensure we start at the Round of 16 (שמינית גמר) slide
         setTimeout(() => {
-            window.scrollToSlide('groups');
+            window.scrollToSlide('round16');
         }, 100);
 
         setTimeout(initScrollSpy, 200);
@@ -461,30 +488,23 @@ function renderBracket(phase) {
 
     const bracketData = {}; 
     
-    if (phase === 'round16' && isGroupsClosed) {
-        const groupStandings = {};
-
-        groupNames.forEach(gn => {
-            const gPlayers = calculatedPlayers.filter(p => p.group === gn);
-            gPlayers.sort((a, b) => b.points - a.points || b.wins - a.wins);
-            groupStandings[gn] = gPlayers;
-        });
-
-        const pairings = [
-            { m: 1, s: 1, g: 'לובאן', r: 0 }, { m: 1, s: 2, g: 'עלי', r: 1 },
-            { m: 2, s: 1, g: 'השבח', r: 0 }, { m: 2, s: 2, g: 'המיליונר', r: 1 },
-            { m: 3, s: 1, g: 'תורמוס', r: 0 }, { m: 3, s: 2, g: 'ששון', r: 1 },
-            { m: 4, s: 1, g: 'הלוזר', r: 0 }, { m: 4, s: 2, g: 'הדורבן', r: 1 },
-            { m: 5, s: 1, g: 'עלי', r: 0 }, { m: 5, s: 2, g: 'לובאן', r: 1 },
-            { m: 6, s: 1, g: 'המיליונר', r: 0 }, { m: 6, s: 2, g: 'השבח', r: 1 },
-            { m: 7, s: 1, g: 'ששון', r: 0 }, { m: 7, s: 2, g: 'תורמוס', r: 1 },
-            { m: 8, s: 1, g: 'הדורבן', r: 0 }, { m: 8, s: 2, g: 'הלוזר', r: 1 }
-        ];
-
-        pairings.forEach(p => {
-            const player = groupStandings[p.g] && groupStandings[p.g][p.r];
-            if (player) bracketData[`${p.m}-${p.s}`] = player;
-        });
+    if (phase === 'round16') {
+        bracketData['1-1'] = getPlayerByName('שמעון רוז');
+        bracketData['1-2'] = getPlayerByName('עומר גליקסמן');
+        bracketData['2-1'] = getPlayerByName('דביר שאול');
+        bracketData['2-2'] = getPlayerByName('מקום שני שבח');
+        bracketData['3-1'] = getPlayerByName('מנצח לובאן');
+        bracketData['3-2'] = getPlayerByName('יניב אזוליא');
+        bracketData['4-1'] = getPlayerByName('איתי רזניק');
+        bracketData['4-2'] = getPlayerByName('אביב לובטון');
+        bracketData['5-1'] = getPlayerByName('איליאן בביקוב');
+        bracketData['5-2'] = getPlayerByName('כפיר פורטר');
+        bracketData['6-1'] = getPlayerByName('יואב כרמל');
+        bracketData['6-2'] = getPlayerByName('גל שמואלי');
+        bracketData['7-1'] = getPlayerByName('רותם צור');
+        bracketData['7-2'] = getPlayerByName('מקום שני לובאן');
+        bracketData['8-1'] = getPlayerByName('יואש רון');
+        bracketData['8-2'] = getPlayerByName('אורי צ\'צ\'קס');
     } else if (phase === 'quarters' && window.closedPhases?.round16) {
         for (let i = 1; i <= 4; i++) {
             bracketData[`${i}-1`] = getPlayerByName(getBracketResult('round16', (i * 2) - 1).winner);
@@ -504,6 +524,9 @@ function renderBracket(phase) {
         bracketData['2-2'] = getPlayerByName(res2.loser);
     }
 
+    let matchesHtmlSideA = '';
+    let matchesHtmlSideB = '';
+
     for (let i = 1; i <= matchCount; i++) {
         const p1 = bracketData[`${i}-1`] || { name: 'TBD', seed: 'none' };
         const p2 = bracketData[`${i}-2`] || { name: 'TBD', seed: 'none' };
@@ -514,35 +537,74 @@ function renderBracket(phase) {
             matchTitle = i === 1 ? 'גמר (מקומות 1-2)' : 'משחק על מקום 3 (מקומות 3-4)';
         }
 
-        matchesHtml += `
-            <div id="node-${phase}-${i}" class="glass-panel p-3 rounded-xl flex flex-col border border-white/5 bracket-node relative w-full max-w-[340px] mx-auto shadow-lg shadow-black/20">
+        const isRound16 = (phase === 'round16');
+        const paddingClass = isRound16 ? 'p-2' : 'p-3';
+        const innerPaddingClass = isRound16 ? 'p-1.5' : 'p-2.5';
+        const gapClass = isRound16 ? 'gap-1.5' : 'gap-2.5';
+        const avatarSize = isRound16 ? 'w-6 h-6' : 'w-8 h-8';
+        const textSize = isRound16 ? 'text-xs' : 'text-sm';
+        const maxWidthClass = isRound16 ? '' : 'max-w-[340px] mx-auto';
+
+        const matchHtml = `
+            <div id="node-${phase}-${i}" class="glass-panel ${paddingClass} rounded-xl flex flex-col border border-white/5 bracket-node relative w-full ${maxWidthClass} shadow-lg shadow-black/20">
                 ${matchTitle ? `<div class="text-[10px] text-primary font-bold uppercase mb-2 px-1 tracking-wider">${matchTitle}</div>` : ''}
-                <div class="flex flex-col gap-2 flex-1 w-full">
-                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
-                        <div class="flex items-center gap-2.5">
-                            <img src="${getPlayerAvatar(p1.name)}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
-                            <span class="text-sm font-bold ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
+                <div class="flex flex-col gap-1.5 flex-1 w-full">
+                    <div class="flex justify-between items-center bg-white/5 ${innerPaddingClass} rounded-lg">
+                        <div class="flex items-center ${gapClass} min-w-0">
+                            <img src="${getPlayerAvatar(p1.name)}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
+                            <span class="${textSize} font-bold truncate ${p1.name === 'TBD' ? 'text-white/20' : ''}">${p1.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs font-bold">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
+                        <span class="font-mono text-primary text-xs font-bold shrink-0">${res.winner === p1.name ? res.score1 : (res.loser === p1.name ? res.score2 : '--')}</span>
                     </div>
-                    <div class="flex justify-between items-center bg-white/5 p-2.5 rounded-lg">
-                        <div class="flex items-center gap-2.5">
-                            <img src="${getPlayerAvatar(p2.name)}" class="w-8 h-8 rounded-full bg-white/10 shadow-inner">
-                            <span class="text-sm font-bold ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
+                    <div class="flex justify-between items-center bg-white/5 ${innerPaddingClass} rounded-lg">
+                        <div class="flex items-center ${gapClass} min-w-0">
+                            <img src="${getPlayerAvatar(p2.name)}" class="${avatarSize} rounded-full bg-white/10 shadow-inner shrink-0">
+                            <span class="${textSize} font-bold truncate ${p2.name === 'TBD' ? 'text-white/20' : ''}">${p2.name}</span>
                         </div>
-                        <span class="font-mono text-primary text-xs font-bold">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
+                        <span class="font-mono text-primary text-xs font-bold shrink-0">${res.winner === p2.name ? res.score1 : (res.loser === p2.name ? res.score2 : '--')}</span>
                     </div>
                 </div>
             </div>
         `;
+
+        if (isRound16) {
+            if (i <= 4) {
+                matchesHtmlSideA += matchHtml;
+            } else {
+                matchesHtmlSideB += matchHtml;
+            }
+        } else {
+            matchesHtml += matchHtml;
+        }
     }
 
-    container.innerHTML = `
-        <div class="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] text-center mb-6 pt-4">${title}</div>
-        <div class="flex flex-col justify-around flex-1 gap-6">
-            ${matchesHtml}
-        </div>
-    `;
+    if (phase === 'round16') {
+        container.innerHTML = `
+            <div class="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] text-center mb-4 pt-4">${title}</div>
+            <div class="grid grid-cols-2 gap-2.5 w-full">
+                <div class="flex flex-col gap-2.5">
+                    <div class="text-[10px] text-red-400 font-black uppercase text-center tracking-wider bg-white/5 py-1 rounded-lg border border-white/5 shadow-inner">צד א'</div>
+                    ${matchesHtmlSideA}
+                </div>
+                <div class="flex flex-col gap-2.5">
+                    <div class="text-[10px] text-blue-400 font-black uppercase text-center tracking-wider bg-white/5 py-1 rounded-lg border border-white/5 shadow-inner">צד ב'</div>
+                    ${matchesHtmlSideB}
+                </div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="text-[10px] text-white/40 uppercase font-bold tracking-[0.2em] text-center mb-6 pt-4">${title}</div>
+            <div class="flex flex-col justify-around flex-1 gap-6">
+                ${matchesHtml}
+            </div>
+        `;
+    }
+
+    const activeBtn = document.querySelector('.phase-btn.active');
+    if (activeBtn && activeBtn.id.replace('btn-phase-', '') === phase) {
+        if (typeof window.adjustSliderHeight === 'function') window.adjustSliderHeight(phase);
+    }
 }
 
 // --- Firebase Realtime Listeners ---
