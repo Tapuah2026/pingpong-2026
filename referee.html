@@ -569,6 +569,10 @@
         let liveP2 = '---';
         let currentEditingMatchId = null;
 
+        function getSetsToWin() {
+            return window.liveBracketPhase ? 3 : 2;
+        }
+
         function initListeners() {
             if (!window.db) {
                 setTimeout(initListeners, 500);
@@ -596,7 +600,8 @@
                     document.getElementById('sets-1-label').innerText = `מערכות: ${sets1}`;
                     document.getElementById('sets-2-label').innerText = `מערכות: ${sets2}`;
 
-                    if (sets1 === 2 || sets2 === 2) {
+                    const setsToWin = getSetsToWin();
+                    if (sets1 === setsToWin || sets2 === setsToWin) {
                         document.getElementById('ref-set-label').innerText = "המשחק הסתיים";
                     } else {
                         document.getElementById('ref-set-label').innerText = `מערכה ${currentSet}`;
@@ -646,7 +651,8 @@
         }
 
         window.updateScore = function (player, change) {
-            if (sets1 === 2 || sets2 === 2) return;
+            const setsToWin = getSetsToWin();
+            if (sets1 === setsToWin || sets2 === setsToWin) return;
 
             if (player === 1) score1 = Math.max(0, score1 + change);
             else score2 = Math.max(0, score2 + change);
@@ -656,7 +662,7 @@
             // Check for set win (must reach 11 AND win by 2)
             if (score1 >= 11 && (score1 - score2) >= 2) {
                 setTimeout(() => {
-                    const isMatchOver = (sets1 + 1) === 2;
+                    const isMatchOver = (sets1 + 1) === setsToWin;
                     const msg = isMatchOver ? "מנצח המערכה: שחקן 1! המשחק הסתיים! לשמור תוצאה?" : "מנצח המערכה: שחקן 1! לעבור למערכה הבאה?";
                     if (confirm(msg)) {
                         sets1++;
@@ -673,7 +679,7 @@
                 }, 100);
             } else if (score2 >= 11 && (score2 - score1) >= 2) {
                 setTimeout(() => {
-                    const isMatchOver = (sets2 + 1) === 2;
+                    const isMatchOver = (sets2 + 1) === setsToWin;
                     const msg = isMatchOver ? "מנצח המערכה: שחקן 2! המשחק הסתיים! לשמור תוצאה?" : "מנצח המערכה: שחקן 2! לעבור למערכה הבאה?";
                     if (confirm(msg)) {
                         sets2++;
@@ -692,7 +698,8 @@
         };
 
         window.nextSet = function () {
-            if (sets1 !== 2 && sets2 !== 2) {
+            const setsToWin = getSetsToWin();
+            if (sets1 !== setsToWin && sets2 !== setsToWin) {
                 currentSet++;
                 score1 = 0;
                 score2 = 0;
@@ -1163,12 +1170,12 @@
 
             const matches = [
                 { p1: 'שמעון רוז', p2: 'עומר גליקסמן', index: 1 },
-                { p1: 'דביר שאול', p2: 'מקום שני שבח', index: 2 },
-                { p1: 'מנצח לובאן', p2: 'יניב אזוליא', index: 3 },
+                { p1: 'דביר שאול', p2: 'סהר מחווי', index: 2 },
+                { p1: 'אהבת השם מקובר', p2: 'יניב אזוליא', index: 3 },
                 { p1: 'איתי רזניק', p2: 'אביב לובטון', index: 4 },
                 { p1: 'איליאן בביקוב', p2: 'כפיר פורטר', index: 5 },
                 { p1: 'יואב כרמל', p2: 'גל שמואלי', index: 6 },
-                { p1: 'רותם צור', p2: 'מקום שני לובאן', index: 7 },
+                { p1: 'רותם צור', p2: 'יובל פישל', index: 7 },
                 { p1: 'יואש רון', p2: 'אורי צ\'צ\'קס', index: 8 }
             ];
 

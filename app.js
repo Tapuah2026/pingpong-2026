@@ -492,8 +492,8 @@ function renderBracket(phase) {
         bracketData['1-1'] = getPlayerByName('שמעון רוז');
         bracketData['1-2'] = getPlayerByName('עומר גליקסמן');
         bracketData['2-1'] = getPlayerByName('דביר שאול');
-        bracketData['2-2'] = getPlayerByName('מקום שני שבח');
-        bracketData['3-1'] = getPlayerByName('מנצח לובאן');
+        bracketData['2-2'] = getPlayerByName('סהר מחווי');
+        bracketData['3-1'] = getPlayerByName('אהבת השם מקובר');
         bracketData['3-2'] = getPlayerByName('יניב אזוליא');
         bracketData['4-1'] = getPlayerByName('איתי רזניק');
         bracketData['4-2'] = getPlayerByName('אביב לובטון');
@@ -502,7 +502,7 @@ function renderBracket(phase) {
         bracketData['6-1'] = getPlayerByName('יואב כרמל');
         bracketData['6-2'] = getPlayerByName('גל שמואלי');
         bracketData['7-1'] = getPlayerByName('רותם צור');
-        bracketData['7-2'] = getPlayerByName('מקום שני לובאן');
+        bracketData['7-2'] = getPlayerByName('יובל פישל');
         bracketData['8-1'] = getPlayerByName('יואש רון');
         bracketData['8-2'] = getPlayerByName('אורי צ\'צ\'קס');
     } else if (phase === 'quarters' && window.closedPhases?.round16) {
@@ -678,12 +678,13 @@ function initAppListeners() {
 
         document.getElementById('p1-name').innerText = data.p1;
         document.getElementById('p2-name').innerText = data.p2;
+        const setsToWin = data.bracketPhase ? 3 : 2;
         document.getElementById('p1-score').innerText = data.score1;
         document.getElementById('p2-score').innerText = data.score2;
         document.getElementById('p1-sets').innerText = `${data.sets1} מערכות`;
         document.getElementById('p2-sets').innerText = `${data.sets2} מערכות`;
-        document.getElementById('match-set').innerText = (data.sets1 === 2 || data.sets2 === 2) ? "המשחק הסתיים" : `מערכה ${data.currentSet}`;
-        document.getElementById('match-timer').innerText = (data.sets1 === 2 || data.sets2 === 2) ? "" : "שידור חי";
+        document.getElementById('match-set').innerText = (data.sets1 === setsToWin || data.sets2 === setsToWin) ? "המשחק הסתיים" : `מערכה ${data.currentSet}`;
+        document.getElementById('match-timer').innerText = (data.sets1 === setsToWin || data.sets2 === setsToWin) ? "" : "שידור חי";
 
         const p1Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p1) : null;
         const p2Base = (typeof players !== 'undefined') ? players.find(p => p.name === data.p2) : null;
@@ -760,12 +761,12 @@ function isRound16Match(p1, p2) {
         (c1.includes(n1) && c2.includes(n2)) || (c2.includes(n1) && c1.includes(n2));
         
     if (check('שמעון', 'גליקסמן')) return true;
-    if (check('דביר', 'שבח')) return true;
-    if (check('לובאן', 'אזול')) return true; // matches מנצח לובאן vs אזולאי / אזוליא
+    if (check('דביר', 'מחווי') || check('דביר', 'שבח')) return true;
+    if (check('מקובר', 'אזול') || check('לובאן', 'אזול')) return true; // matches מנצח לובאן vs אזולאי / אזוליא
     if (check('רזניק', 'לובטון')) return true;
     if (check('בביקוב', 'פורטר')) return true;
     if (check('יואב', 'שמואלי')) return true;
-    if (check('רותם', 'לובאן')) return true; // matches רותם vs מקום שני לובאן
+    if (check('רותם', 'פישל') || check('רותם', 'לובאן')) return true; // matches רותם vs מקום שני לובאן
     if (check('יואש', 'צצקס')) return true; // matches יואש vs צ'צ'קס / צ׳צ׳קס
     
     return false;
