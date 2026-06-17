@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <title>Fix Group Scores</title>
@@ -7,12 +8,37 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; padding: 20px; }
-        pre { background: #1e293b; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
-        button { background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px 0; }
-        button:hover { background: #dc2626; }
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        pre {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+
+        button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background: #dc2626;
+        }
     </style>
 </head>
+
 <body>
     <h1>Fix Group Scores</h1>
     <p>This will ensure the following players have 3W-0L in their groups:</p>
@@ -24,6 +50,7 @@
     <h3>שמינית גמר:</h3>
     <ul>
         <li><strong>אורי צ'צ'קס</strong> 3-2 <strong>יואש רון</strong> (match #8)</li>
+        <li><strong>איתי רזניק</strong> 3-0 <strong>אביב לובטון</strong> (match #4)</li>
     </ul>
     <h3>רבע גמר:</h3>
     <ul>
@@ -57,11 +84,13 @@
             { p1: 'רותם צור', p2: 'זיו מימון', sets1: 2, sets2: 0 },
             // שמינית גמר match #8: אורי צ'צ'קס beats יואש רון 3-2
             { p1: 'אורי צ\'צ\'קס', p2: 'יואש רון', sets1: 3, sets2: 2, bracketPhase: 'round16', bracketIndex: 8 },
+            // שמינית גמר match #4: איתי רזניק beats אביב לובטון 3-0
+            { p1: 'איתי רזניק', p2: 'אביב לובטון', sets1: 3, sets2: 0, bracketPhase: 'round16', bracketIndex: 4 },
 
             // רבע גמר pairings (status: scheduled or completed matches to initialize them)
             { p1: 'שמעון רוז', p2: 'סהר מחווי', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 1 },
             { p1: 'אהבת השם מקובר', p2: 'איתי רזניק', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 2 },
-            { p1: 'יואב כרמל', p2: 'כפיר פורטר', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 3 },
+            { p1: 'יואב כרמל', p2: 'כפיר פורטר', sets1: 3, sets2: 0, bracketPhase: 'quarters', bracketIndex: 3 },
             { p1: 'רותם צור', p2: 'אורי צ\'צ\'קס', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 4 },
         ];
 
@@ -134,4 +163,5 @@
         }
     </script>
 </body>
+
 </html>
