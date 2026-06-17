@@ -25,6 +25,13 @@
     <ul>
         <li><strong>אורי צ'צ'קס</strong> 3-2 <strong>יואש רון</strong> (match #8)</li>
     </ul>
+    <h3>רבע גמר:</h3>
+    <ul>
+        <li>שמעון רוז vs סהר מחווי</li>
+        <li>אהבת השם מקובר vs איתי רזניק</li>
+        <li>יואב כרמל vs כפיר פורטר</li>
+        <li>רותם צור vs אורי צ'צ'קס</li>
+    </ul>
     <button onclick="checkAndFix()">Check & Fix Scores</button>
     <pre id="log">Waiting...</pre>
 
@@ -50,6 +57,12 @@
             { p1: 'רותם צור', p2: 'זיו מימון', sets1: 2, sets2: 0 },
             // שמינית גמר match #8: אורי צ'צ'קס beats יואש רון 3-2
             { p1: 'אורי צ\'צ\'קס', p2: 'יואש רון', sets1: 3, sets2: 2, bracketPhase: 'round16', bracketIndex: 8 },
+
+            // רבע גמר pairings (status: scheduled or completed matches to initialize them)
+            { p1: 'שמעון רוז', p2: 'סהר מחווי', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 1 },
+            { p1: 'אהבת השם מקובר', p2: 'איתי רזניק', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 2 },
+            { p1: 'יואב כרמל', p2: 'כפיר פורטר', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 3 },
+            { p1: 'רותם צור', p2: 'אורי צ\'צ\'קס', sets1: 0, sets2: 0, bracketPhase: 'quarters', bracketIndex: 4 },
         ];
 
         async function checkAndFix() {
