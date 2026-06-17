@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Fix Group Scores</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; padding: 20px; }
+        pre { background: #1e293b; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
+        button { background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+    <h1>Fix Group Scores</h1>
+    <p>This will ensure the following players have 3W-0L in their groups:</p>
+    <ul>
+        <li><strong>אהבת השם מקובר</strong> (לובאן) — 3 wins vs יובל פישל, ניב סמיה, שון אשכנזי</li>
+        <li><strong>יואב כרמל</strong> (השבח) — 3 wins vs סהר מחווי, ניצן בן צבי, עומר תלמי</li>
+        <li><strong>רותם צור</strong> (הלוזר) — 3 wins vs אביב לובטון, עמית שבתאי לוי, זיו מימון</li>
+    </ul>
+    <h3>שמינית גמר:</h3>
+    <ul>
+        <li><strong>אורי צ'צ'קס</strong> 3-2 <strong>יואש רון</strong> (match #8)</li>
+    </ul>
+    <button onclick="checkAndFix()">Check & Fix Scores</button>
+    <pre id="log">Waiting...</pre>
+
+    <script>
+        const log = document.getElementById('log');
+        function addLog(msg) {
+            log.textContent += '\n' + msg;
+        }
+
+        // The matches we need to exist (all group stage, no bracketPhase)
+        const requiredMatches = [
+            // אהבת השם מקובר wins all 3 in לובאן
+            { p1: 'אהבת השם מקובר', p2: 'יובל פישל', sets1: 2, sets2: 0 },
+            { p1: 'אהבת השם מקובר', p2: 'ניב סמיה', sets1: 2, sets2: 0 },
+            { p1: 'אהבת השם מקובר', p2: 'שון אשכנזי', sets1: 2, sets2: 0 },
+            // יואב כרמל wins all 3 in השבח
+            { p1: 'יואב כרמל', p2: 'סהר מחווי', sets1: 2, sets2: 0 },
+            { p1: 'יואב כרמל', p2: 'ניצן בן צבי', sets1: 2, sets2: 0 },
+            { p1: 'יואב כרמל', p2: 'עומר תלמי', sets1: 2, sets2: 0 },
+            // רותם צור wins all 3 in הלוזר
+            { p1: 'רותם צור', p2: 'אביב לובטון', sets1: 2, sets2: 0 },
+            { p1: 'רותם צור', p2: 'עמית שבתאי לוי', sets1: 2, sets2: 0 },
+            { p1: 'רותם צור', p2: 'זיו מימון', sets1: 2, sets2: 0 },
+            // שמינית גמר match #8: אורי צ'צ'קס beats יואש רון 3-2
+            { p1: 'אורי צ\'צ\'קס', p2: 'יואש רון', sets1: 3, sets2: 2, bracketPhase: 'round16', bracketIndex: 8 },
+        ];
+
+        async function checkAndFix() {
+            log.textContent = 'Checking existing matches...';
+
+            const snapshot = await window.db.ref('completedMatches').once('value');
+            const existing = snapshot.val() || {};
+            const existingMatches = Object.values(existing);
+
+            addLog(`Found ${existingMatches.length} existing completed matches.`);
+
+            function matchExists(req) {
+                return existingMatches.some(m => {
+                    // For knockout matches, check by bracketPhase + bracketIndex
+                    if (req.bracketPhase) {
+                        return m.bracketPhase === req.bracketPhase && m.bracketIndex === req.bracketIndex;
+                    }
+                    // For group matches, check by player names (skip knockout matches)
+                    if (m.bracketPhase) return false;
+                    const sameOrder = m.p1 === req.p1 && m.p2 === req.p2;
+                    const reverseOrder = m.p1 === req.p2 && m.p2 === req.p1;
+                    return sameOrder || reverseOrder;
+                });
+            }
+
+            let added = 0;
+            const ref = window.db.ref('completedMatches');
+
+            for (const req of requiredMatches) {
+                if (matchExists(req)) {
+                    // Check if the existing match has the WRONG result
+                    const wrongResult = existingMatches.find(m => {
+                        if (m.bracketPhase) return false;
+                        const sameOrder = m.p1 === req.p1 && m.p2 === req.p2;
+                        const reverseOrder = m.p1 === req.p2 && m.p2 === req.p1;
+                        if (sameOrder) return m.sets1 < m.sets2; // req.p1 should win but lost
+                        if (reverseOrder) return m.sets2 < m.sets1; // req.p1 should win but lost
+                        return false;
+                    });
+
+                    if (wrongResult) {
+                        addLog(`⚠️ WRONG RESULT: ${req.p1} vs ${req.p2} — need to fix manually in Firebase`);
+                    } else {
+                        addLog(`✅ Already exists: ${req.p1} vs ${req.p2}`);
+                    }
+                } else {
+                    const matchData = {
+                        id: Date.now() + added,
+                        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        p1: req.p1,
+                        p2: req.p2,
+                        score1: 0,
+                        score2: 0,
+                        sets1: req.sets1,
+                        sets2: req.sets2,
+                        bracketPhase: req.bracketPhase || null,
+                        bracketIndex: req.bracketIndex || null
+                    };
+                    await ref.push(matchData);
+                    added++;
+                    addLog(`➕ Added: ${req.p1} 2-0 ${req.p2}`);
+                }
+            }
+
+            addLog(`\n--- Done! Added ${added} matches. ---`);
+            if (added > 0) {
+                addLog('Refresh the main page to see updated standings.');
+            }
+        }
+    </script>
+</body>
+</html>

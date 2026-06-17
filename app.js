@@ -72,7 +72,10 @@ function calculatePlayerStats(completedMatches) {
 
     const matches = Object.values(completedMatches);
 
-    matches.forEach(m => {
+    // Only count group-stage matches for player stats (not knockout matches)
+    const groupMatches = matches.filter(m => !m.bracketPhase);
+
+    groupMatches.forEach(m => {
         const p1 = stats.find(p => p.name === m.p1);
         const p2 = stats.find(p => p.name === m.p2);
 
