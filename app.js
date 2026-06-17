@@ -775,6 +775,24 @@ function isRound16Match(p1, p2) {
     return false;
 }
 
+function isQuartersMatch(p1, p2) {
+    if (!p1 || !p2) return false;
+    
+    const clean = s => s.replace(/[\u05F3\u05F4'"`׳]/g, '').trim();
+    const c1 = clean(p1);
+    const c2 = clean(p2);
+    
+    const check = (n1, n2) => 
+        (c1.includes(n1) && c2.includes(n2)) || (c2.includes(n1) && c1.includes(n2));
+        
+    if (check('שמעון', 'מחווי') || check('שמעון', 'סהר')) return true;
+    if (check('מקובר', 'רזניק')) return true;
+    if (check('יואב', 'פורטר')) return true;
+    if (check('רותם', 'צצקס')) return true;
+    
+    return false;
+}
+
 function updateUpcomingUI(data) {
     const container = document.getElementById('home-upcoming-queue');
     if (!container) return;
@@ -792,8 +810,12 @@ function updateUpcomingUI(data) {
         let groupHeader = "משחקים אחרים";
         
         let phase = m.bracketPhase;
-        if (!phase && isRound16Match(m.p1, m.p2)) {
-            phase = 'round16';
+        if (!phase) {
+            if (isRound16Match(m.p1, m.p2)) {
+                phase = 'round16';
+            } else if (isQuartersMatch(m.p1, m.p2)) {
+                phase = 'quarters';
+            }
         }
         
         if (phase) {
