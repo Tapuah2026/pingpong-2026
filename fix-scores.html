@@ -56,7 +56,7 @@
     <ul>
         <li>שמעון רוז vs סהר מחווי</li>
         <li>אהבת השם מקובר vs איתי רזניק</li>
-        <li>יואב כרמל vs כפיר פורטר</li>
+        <li><strong>יואב כרמל</strong> 3-0 <strong>כפיר פורטר</strong> (match #3)</li>
         <li>רותם צור vs אורי צ'צ'קס</li>
     </ul>
     <button onclick="checkAndFix()">Check & Fix Scores</button>
@@ -122,20 +122,41 @@
 
             for (const req of requiredMatches) {
                 if (matchExists(req)) {
-                    // Check if the existing match has the WRONG result
-                    const wrongResult = existingMatches.find(m => {
-                        if (m.bracketPhase) return false;
-                        const sameOrder = m.p1 === req.p1 && m.p2 === req.p2;
-                        const reverseOrder = m.p1 === req.p2 && m.p2 === req.p1;
-                        if (sameOrder) return m.sets1 < m.sets2; // req.p1 should win but lost
-                        if (reverseOrder) return m.sets2 < m.sets1; // req.p1 should win but lost
-                        return false;
-                    });
-
-                    if (wrongResult) {
-                        addLog(`⚠️ WRONG RESULT: ${req.p1} vs ${req.p2} — need to fix manually in Firebase`);
+                    // For bracket/knockout matches, check if we need to update/fill the score
+                    if (req.bracketPhase) {
+                        const existingMatchKey = Object.keys(existing).find(key => {
+                            const m = existing[key];
+                            return m.bracketPhase === req.bracketPhase && m.bracketIndex === req.bracketIndex;
+                        });
+                        if (existingMatchKey) {
+                            const existingMatch = existing[existingMatchKey];
+                            if (existingMatch.sets1 !== req.sets1 || existingMatch.sets2 !== req.sets2) {
+                                await ref.child(existingMatchKey).update({
+                                    sets1: req.sets1,
+                                    sets2: req.sets2
+                                });
+                                addLog(`🔄 Updated: ${req.p1} vs ${req.p2} score set to ${req.sets1}-${req.sets2}`);
+                                added++;
+                            } else {
+                                addLog(`✅ Already exists with correct score: ${req.p1} vs ${req.p2} (${req.sets1}-${req.sets2})`);
+                            }
+                        }
                     } else {
-                        addLog(`✅ Already exists: ${req.p1} vs ${req.p2}`);
+                        // Check if the existing match has the WRONG result
+                        const wrongResult = existingMatches.find(m => {
+                            if (m.bracketPhase) return false;
+                            const sameOrder = m.p1 === req.p1 && m.p2 === req.p2;
+                            const reverseOrder = m.p1 === req.p2 && m.p2 === req.p1;
+                            if (sameOrder) return m.sets1 < m.sets2; // req.p1 should win but lost
+                            if (reverseOrder) return m.sets2 < m.sets1; // req.p1 should win but lost
+                            return false;
+                        });
+
+                        if (wrongResult) {
+                            addLog(`⚠️ WRONG RESULT: ${req.p1} vs ${req.p2} — need to fix manually in Firebase`);
+                        } else {
+                            addLog(`✅ Already exists: ${req.p1} vs ${req.p2}`);
+                        }
                     }
                 } else {
                     const matchData = {
