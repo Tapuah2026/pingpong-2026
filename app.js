@@ -453,9 +453,9 @@ window.switchView = function (viewId) {
         renderBracket('semis');
         renderBracket('final');
 
-        // Ensure we start at the Round of 16 (שמינית גמר) slide
+        // Ensure we start at the Quarter-finals (רבע גמר) slide
         setTimeout(() => {
-            window.scrollToSlide('round16');
+            window.scrollToSlide('quarters');
         }, 100);
 
         setTimeout(initScrollSpy, 200);
